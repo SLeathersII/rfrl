@@ -1,0 +1,10 @@
+distinctipy
+jsonschema
+m2r2
+matplotlib
+numpy
+scipy
+sphinx
+sphinx-rtd-theme
+sphinx-jsonschema
+tqdm
