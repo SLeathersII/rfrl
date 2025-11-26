@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: rfrl-gym
+Version: 0.1
+Author: Virginia Tech National Security Institute and Morehouse College
+License-File: LICENSE
+Requires-Dist: gymnasium
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: distinctipy
+Requires-Dist: pyqtgraph
+Requires-Dist: pyqt6==6.7.1
+Requires-Dist: scipy
+Provides-Extra: rl-packages
+Requires-Dist: stable_baselines3==2.5.0a1; extra == "rl-packages"
+Dynamic: author
+Dynamic: license-file
+Dynamic: provides-extra
+Dynamic: requires-dist

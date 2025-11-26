@@ -1,0 +1,10 @@
+gymnasium
+numpy
+matplotlib
+distinctipy
+pyqtgraph
+pyqt6==6.7.1
+scipy
+
+[rl_packages]
+stable_baselines3==2.5.0a1
