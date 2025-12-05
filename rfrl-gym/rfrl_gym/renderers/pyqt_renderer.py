@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import scipy.signal as signal
 from scipy.fft import fftshift
 class PyQtRenderer(Renderer, QMainWindow):
-    def __init__(self, num_episodes, scenario_metadata, mode):
+    def __init__(self, num_episodes, scenario_metadata, mode, samples_per_step):
         super(PyQtRenderer, self).__init__(num_episodes, scenario_metadata)
         self.max_steps = scenario_metadata['environment']['max_steps']
         self.render_background = scenario_metadata['render']['render_background']
@@ -20,7 +20,7 @@ class PyQtRenderer(Renderer, QMainWindow):
         self.show_flag = 0
         self.win_width = 1400
         self.win_height = 900
-        self.samples_per_step = 10000
+        self.samples_per_step = samples_per_step
         self.t = np.linspace(0, self.samples_per_step, self.samples_per_step)
         self.fc = np.linspace(-0.5, 0.5, self.num_channels+1)+1/self.num_channels/2
         # Note: Higher orders of this low-pass filter will allow more accurate signal
@@ -124,7 +124,7 @@ class PyQtRenderer(Renderer, QMainWindow):
 
         if self.mode == 'iq':
             self.__get_spectrogram_image()
-            self.__get_sensing_image()  
+            #self.__get_sensing_image()
             self.spectrum_image_item.setImage(self.spectrum_image)
             self.sensing_image_item.setImage((self.sensing_image-np.min(self.sensing_image))/(np.max(self.sensing_image)-np.min(self.sensing_image)))
             self.bar1.setImageItem(self.spectrum_image_item, insert_in=self.spectrumPlotItem)  
@@ -329,13 +329,7 @@ class PyQtRenderer(Renderer, QMainWindow):
             painter.end()
             item.setIcon(0,QtGui.QIcon(pixmap))
             item.setText(0,entity_label)
-            
-            #testing_item = QTreeWidgetItem(self.legend_view)
-            #testing_item.setForeground(0, QtGui.QBrush(QtGui.QColor(255,255,255)))
-            
-            #testing_item.setText(0, '    Hello World')
-            #item.addChild(testing_item)
-            #self.legend_view.addTopLevelItem(item)
+
 
 
     def __initialize_cummulative_reward_view(self):
@@ -391,7 +385,7 @@ class PyQtRenderer(Renderer, QMainWindow):
             elif self.render_background == "black":
                 self.occupancy_image[channel,0,:] = [0,0,0]
             channel_entity = self.info['observation_history'][self.info['step_number']][channel]
-            if self.info['action_history'][0][self.info['step_number']] == channel:
+            if self.info['action_history']['user_agent'][self.info['step_number']] == channel:
                 if channel_entity != 0:
                     self.occupancy_image[channel, 0, :] = [255, 0, 0]
                 else:
