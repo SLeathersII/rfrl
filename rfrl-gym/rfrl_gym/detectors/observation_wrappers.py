@@ -146,7 +146,7 @@ class OracleMap(Sensor):
         observation_int = 0
         for idx in range(len(observation_vect)):
             observation_int += (self.observation_base ** idx) * observation_vect[idx]
-        return observation_int
+        return int(observation_int)
 
     def observation(self, signal_data: ObsType) -> WrapperObsType:
         true_history_step = self.env.unwrapped._get_true_step_occupancy()

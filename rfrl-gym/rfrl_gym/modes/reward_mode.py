@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+import numpy as np
 from ..envs import RFRLGymIQEnv2
 from typing import TYPE_CHECKING, Any, Generic, SupportsFloat, TypeVar
 from gymnasium import Env, Wrapper
@@ -55,8 +55,9 @@ class DSA(RewardMode):
             reward = 0
         else:
             # boolean = True if agent action is not in occupied place
-            reward = 2.0 * int(self.env.unwrapped.info['true_history'][self.env.unwrapped.info['step_number']][action] == 0) -1.0
+            reward = int(2.0 * int(self.env.unwrapped.info['true_history'][self.env.unwrapped.info['step_number']][action] == 0) -1.0)
         self.env.unwrapped.info['reward_history'][self.env.unwrapped.info['step_number']] = reward
+        self.env.unwrapped.info['cumulative_reward'][self.env.unwrapped.info['step_number']] = np.sum(self.env.unwrapped.info['reward_history'])
         return reward
 
 class Jam(RewardMode):
@@ -73,6 +74,8 @@ class Jam(RewardMode):
         else:
             # get target idx from action_history
             target_idx = self.env.unwrapped.info['action_history'][self.env.unwrapped.target_entity][self.env.unwrapped.info['step_number']]
-            reward = 2.0 * int(target_idx == action) -1.0
+            reward = int(2.0 * (target_idx == action) -1.0)
         self.env.unwrapped.info['reward_history'][self.env.unwrapped.info['step_number']] = reward
+        self.env.unwrapped.info['cumulative_reward'][self.env.unwrapped.info['step_number']] = np.sum(
+            self.env.unwrapped.info['reward_history'])
         return reward

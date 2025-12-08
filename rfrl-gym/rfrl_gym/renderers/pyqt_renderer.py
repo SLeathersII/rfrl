@@ -124,7 +124,7 @@ class PyQtRenderer(Renderer, QMainWindow):
 
         if self.mode == 'iq':
             self.__get_spectrogram_image()
-            #self.__get_sensing_image()
+            self.__get_sensing_image()
             self.spectrum_image_item.setImage(self.spectrum_image)
             self.sensing_image_item.setImage((self.sensing_image-np.min(self.sensing_image))/(np.max(self.sensing_image)-np.min(self.sensing_image)))
             self.bar1.setImageItem(self.spectrum_image_item, insert_in=self.spectrumPlotItem)  
@@ -414,7 +414,7 @@ class PyQtRenderer(Renderer, QMainWindow):
 
             # Since the render() call comes before the step() call in the main loop, we can store
             # the results we just calculated to avoid expensive duplicate calculations later
-            self.info['sensing_energy_history'][self.info['step_number']][k] = sensed_result
+            #self.info['sensing_energy_history'][self.info['step_number']][k] = sensed_result
 
 
 
