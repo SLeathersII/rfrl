@@ -11,10 +11,11 @@ import scipy.signal as signal
 from pywaspgen.burst_def import BurstDef
 from pywaspgen.iq_datagen import IQDatagen
 
+
 class RFRLGymIQEnv2(gym.Env):
-    metadata = {'render_modes': ['null', 'terminal', 'pyqt'], 'render_fps':4,
-                    'reward_modes': ['dsa', 'jam'],
-                    'observation_modes': ['detect', 'classify']}
+    metadata = {'render_modes': ['null', 'terminal', 'pyqt'], 'render_fps': 4,
+                'reward_modes': ['dsa', 'jam'],
+                'observation_modes': ['detect', 'classify']}
 
     def __init__(self, scenario_filename,
                  pywasp_config,
@@ -39,8 +40,10 @@ class RFRLGymIQEnv2(gym.Env):
         detector_gen = rfrl_gym.detectors.DetectorGenerator(self.scenario_metadata)
         self.detector = detector_gen.detector_out()
         self.t = np.linspace(0, self.samples_per_step, self.samples_per_step)
-        self.fc = np.linspace(-0.5, 0.5, self.num_channels+1)+1/self.num_channels/2
-        self.sos = signal.butter(100, 1/self.num_channels, output='sos')
+        channel_width = 1.0 / self.num_channels  #  channel width for fc
+        # Create array of channel centers
+        self.fc = np.linspace(-0.5 + channel_width / 2, 0.5 - channel_width / 2, self.num_channels)
+        self.sos = signal.butter(100, 1 / self.num_channels, output='sos')
 
         # Get the entity parameters from the scenario file and initialize the entities.
         self.entity_generator = rfrl_gym.entities.EntityGenerator(self.scenario_metadata)
@@ -49,11 +52,10 @@ class RFRLGymIQEnv2(gym.Env):
         self.num_entities = len(self.entity_list)
         # TODO assess removing this block/ determine a better way to label target_idx
         entity_idx = 0
-        for entity in self.scenario_metadata['entities']:  
+        for entity in self.scenario_metadata['entities']:
             entity_idx += 1
             if entity == self.target_entity:
                 self.target_idx = entity_idx
-
 
         # Get the render parameters from the scenario file and initialize the render if necessary.
         self.render_mode = self.scenario_metadata['render']['render_mode']
@@ -64,22 +66,23 @@ class RFRLGymIQEnv2(gym.Env):
             self.pyqt_app = QApplication([])
 
         # Set the gym's baseline action and observation spaces.
-        # todo action space 0 can put us to -1
-        self.action_space = gym.spaces.Discrete(1+self.num_channels)     
-        if self.observation_mode == 'detect':
-            self.observation_base = 2
-        elif self.observation_mode == 'classify':
-            self.observation_base = 1+self.num_entities
-        self.observation_space = gym.spaces.Discrete(self.observation_base**self.num_channels)
-        #self.observation_space = gym.spaces.dict("i": gym.spaces.Box())
-        #data generation
+        self.action_space = gym.spaces.Discrete(self.num_channels)
+        # TODO find a way to keep this backwards compatible/ ask about classify mode/ testing
+        # if self.observation_mode == 'detect':
+        #     self.observation_base = 2
+        # elif self.observation_mode == 'classify':
+        #     self.observation_base = 1 + self.num_entities
+        # self.observation_space = gym.spaces.Discrete(self.observation_base ** self.num_channels)
+        #self.observation_space = gym.spaces.MultiBinary(self.num_channels)
+        # TODO get real values for low and high that represent expectations
+        self.observation_space = gym.spaces.Box(low=-100, high=100, shape=(2,self.samples_per_step), dtype=np.float64)
+        # self.observation_space = gym.spaces.dict("i": gym.spaces.Box())
+        # data generation
         self.signal_generator = IQDatagen(pywasp_config)
         self.user_burst_list = []
-        self.rng=np.random.default_rng(self.seed)
+        self.rng = np.random.default_rng(self.seed)
 
-
-
-        #load the entity information from the json file and create the Pywasgen bursts
+        # load the entity information from the json file and create the Pywasgen bursts
         for entity in self.entity_list:
             if "order" not in entity.modem_params.keys():
                 entity.modem_params["order"] = None
@@ -96,8 +99,9 @@ class RFRLGymIQEnv2(gym.Env):
         true_history_step = np.zeros(self.num_channels)
         for key, value in self.info['action_history'].items():
             if value[self.info['step_number']] != -1 and key != 'user_agent':
-                true_history_step[value[self.info['step_number']]] = 1 # if channel is occupied flag it
-        return true_history_step
+                true_history_step[value[self.info['step_number']]] = 1  # if channel is occupied flag it
+        return true_history_step.astype(np.int8)
+
     def agent_iq(self, action):
         """
         method to generate the agent BurstDef on step -- can be overloaded to accomadate different action spaces
@@ -105,7 +109,7 @@ class RFRLGymIQEnv2(gym.Env):
             action: agent action passed in on step
         Returns: agent BurstDef
         """
-        center_frequency = self.fc[action] + (self.rng.uniform(low=0, high=self.num_channels)/self.num_channels)
+        center_frequency = self.fc[action] + (self.rng.uniform(low=0, high=self.num_channels) / self.num_channels)
 
     def iq_gen(self):
         """
@@ -118,10 +122,10 @@ class RFRLGymIQEnv2(gym.Env):
 
         for entity in self.entity_list:
             action = action_history_step[entity.entity_label]
-            if action != -1: #entity is on
+            if action != -1:  # entity is on
                 center_frequency = self.rng.uniform(entity.modem_params['center_frequency'][0],
                                                     entity.modem_params['center_frequency'][1])
-                new_center_frequency = self.fc[action] + center_frequency/self.num_channels
+                new_center_frequency = self.fc[action] + center_frequency / self.num_channels
                 burst_list.append(BurstDef(
                     cent_freq=new_center_frequency,
                     bandwidth=(entity.modem_params["bandwidth"] / self.num_channels),
@@ -135,14 +139,12 @@ class RFRLGymIQEnv2(gym.Env):
             else:  # entity is in off position
                 pass
 
-
         signal_data, self.user_burst_list = self.signal_generator.gen_iqdata([burst_list])
-       # print(len(self.user_burst_list[0]), len(burst_list))
+        # print(len(self.user_burst_list[0]), len(burst_list))
         return signal_data, action_history_step
 
-
     def step(self, action):
-        action -= 1
+        #action -= 1
         self.info['step_number'] += 1
         self.info['action_history']["user_agent"][self.info['step_number']] = action
         # call gen iq to get signal data and enity truth
@@ -155,16 +157,17 @@ class RFRLGymIQEnv2(gym.Env):
         # Update return variables and run the render.
         done = False
         if self.info['step_number'] == self.max_steps:
-            self.info['episode_reward'] = np.append(self.info['episode_reward'], self.info['cumulative_reward'][self.info['step_number']])
+            self.info['episode_reward'] = np.append(self.info['episode_reward'],
+                                                    self.info['cumulative_reward'][self.info['step_number']])
             done = True
-
-        return self.info['spectrum_data'][0:self.samples_per_step], 0., done, done, self.info
+        # outputs the IQ data for the observation, and dummy variable 0 for reward on base
+        return self.__observation_space_encoder(None), 0, done, done, self.info
 
     def reset(self, options=None, seed=None):
         # Temporarily store episode specific variables if they exist.
         if hasattr(self, 'info') and isinstance(options, type(None)):
             episode_number = self.info['episode_number']
-            episode_reward = self.info['episode_reward']            
+            episode_reward = self.info['episode_reward']
         else:
             episode_number = -1
             episode_reward = np.array([], dtype=float)
@@ -178,25 +181,24 @@ class RFRLGymIQEnv2(gym.Env):
                                                                               self.samples_per_step)
             if self.render_mode != 'null':
                 self.renderer.reset()
-        #print('starting info')
+        # print('starting info')
         # Reset the gym info dictionary and if necessary restore episode variables.
         self.info = {}
         self.info['step_number'] = 0
         self.info['num_entities'] = self.num_entities
         self.info['num_episodes'] = self.num_episodes
-        self.info['episode_reward'] = episode_reward  
+        self.info['episode_reward'] = episode_reward
         self.info['episode_number'] = episode_number + 1
         # todo consider way to make dynamic if we have multiple agents in scene
-        self.info['action_history'] = {"user_agent": -1+np.zeros(self.max_steps+1, dtype=int)}
+        self.info['action_history'] = {"user_agent": -1 + np.zeros(self.max_steps + 1, dtype=int)}
         for entity in self.entity_list:
-            self.info['action_history'][entity.entity_label] = -1+np.zeros(self.max_steps+1, dtype=int)
-        self.info['true_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
-        self.info['observation_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
-        self.info['reward_history'] = np.zeros(self.max_steps+1, dtype=float)
-        self.info['cumulative_reward'] = np.zeros(self.max_steps+1, dtype=float)
-        self.info['sensing_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
-        self.info['sensing_energy_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=float)
-
+            self.info['action_history'][entity.entity_label] = -1 + np.zeros(self.max_steps + 1, dtype=int)
+        self.info['true_history'] = np.zeros((self.max_steps + 1, self.num_channels), dtype=int)
+        self.info['observation_history'] = np.zeros((self.max_steps + 1, self.num_channels), dtype=int)
+        self.info['reward_history'] = np.zeros(self.max_steps + 1, dtype=float)
+        self.info['cumulative_reward'] = np.zeros(self.max_steps + 1, dtype=float)
+        self.info['sensing_history'] = np.zeros((self.max_steps + 1, self.num_channels), dtype=int)
+        self.info['sensing_energy_history'] = np.zeros((self.max_steps + 1, self.num_channels), dtype=float)
 
         for entity in self.entity_list:
             entity.reset(self.info)
@@ -205,62 +207,76 @@ class RFRLGymIQEnv2(gym.Env):
         for key, value in action_history_step.items():
             self.info['action_history'][key][self.info['step_number']] = value
         self.info['true_history'][self.info['step_number']] = self._get_true_step_occupancy()
-        #Instantiate the spectrum of samples and then use Pywaspgen to generate the initial bursts
+        # Instantiate the spectrum of samples and then use Pywaspgen to generate the initial bursts
         # noise
-        #print('creating noise')
+        # print('creating noise')
         # TODO ask about random noise generated here
-        self.info['spectrum_data'] =  np.random.normal(0.0, np.sqrt(0.5), self.samples_per_step *\
-                                                       self.scenario_metadata['render']['render_history']) + 1.0j *\
-                                      (np.random.normal(0.0, np.sqrt(0.5), self.samples_per_step *\
-                                                        self.scenario_metadata['render']['render_history']))
+        self.info['spectrum_data'] = np.random.normal(0.0, np.sqrt(0.5), self.samples_per_step * \
+                                                      self.scenario_metadata['render']['render_history']) + 1.0j * \
+                                     (np.random.normal(0.0, np.sqrt(0.5), self.samples_per_step * \
+                                                       self.scenario_metadata['render']['render_history']))
 
-        #print(data, np.shape(data))
+        # print(data, np.shape(data))
         # add signals to noise
         self.info['spectrum_data'][0:self.samples_per_step] += signal_data[0]
 
         # Reset the render and set return variables.
-       # print('observation')
-        observation = self.__observation_space_encoder(self.info['observation_history'][0])
-        return int(observation), {}
-        
+        # print('observation')
+        #observation = self.__observation_space_encoder(self.info['observation_history'][0])
+        #true_obs = self._get_true_step_occupancy()
+
+        return self.observation_space.sample(), {}
+
     def render(self):
         if self.render_mode != 'null':
             if self.info['step_number'] == 0:
                 self.next_frame_time = time.time()
-            
-            self.renderer.render(self.info)  
-            self.next_frame_time += 1.0/self.render_fps
-            time.sleep(1/self.render_fps)
+
+            self.renderer.render(self.info)
+            self.next_frame_time += 1.0 / self.render_fps
+            time.sleep(1 / self.render_fps)
 
             if time.time() < self.next_frame_time:
                 time.sleep(self.next_frame_time - time.time())
         return
 
-    def close(self):        
+    def close(self):
         input('Press Enter to end the simulation...')
         return
 
     def __validate_scenario_metadata(self):
         # Validate scenario environment parameters.
-        assert self.scenario_metadata['environment']['num_channels'] > 0, 'Environment parameter \'num_channels\' is invalid.'
+        assert self.scenario_metadata['environment'][
+                   'num_channels'] > 0, 'Environment parameter \'num_channels\' is invalid.'
         assert self.scenario_metadata['environment']['max_steps'] > 0, 'Environment parameter \'max_steps\' is invalid.'
-        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], 'Invalid observation mode. Must be one of the following options: {}'.format(self.metadata["observation_modes"])
-        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'], 'Invalid reward mode. Must be one of the following options: {}'.format(self.metadata["reward_modes"])
+        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata[
+            'observation_modes'], 'Invalid observation mode. Must be one of the following options: {}'.format(
+            self.metadata["observation_modes"])
+        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata[
+            'reward_modes'], 'Invalid reward mode. Must be one of the following options: {}'.format(
+            self.metadata["reward_modes"])
         if self.scenario_metadata['environment']['reward_mode'] == 'jam':
-            assert self.scenario_metadata['environment']['target_entity'] in self.scenario_metadata['entities'].keys() or self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name. Must correspond to the name of one of the entity labels in the scenario file.'
-        
+            assert self.scenario_metadata['environment']['target_entity'] in self.scenario_metadata[
+                'entities'].keys() or self.scenario_metadata['environment'][
+                       'target_entity'] == None,\
+                'Invalid target entity name.\
+                 Must correspond to the name of one of the entity labels in the scenario file.'
         # Validate scenario render parameters.
-        assert self.scenario_metadata['render']['render_mode'] is None or self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'], 'Invalid render mode. Must be one of the following options: {}'.format(self.metadata["render_modes"])
+        assert self.scenario_metadata['render']['render_mode'] is None or self.scenario_metadata['render'][
+            'render_mode'] in self.metadata[
+                   'render_modes'], 'Invalid render mode. Must be one of the following options: {}'.format(
+            self.metadata["render_modes"])
         assert self.scenario_metadata['render']['render_fps'] > 0, 'Render parameter \'render_fps\' is invalid.'
         assert self.scenario_metadata['render']['render_history'] > 0, 'Render parameter \'render_history\' is invalid.'
-    
-    def __observation_space_encoder(self, observation_vect):
-        observation_int = 0
-        for idx in range(len(observation_vect)):
-            observation_int += (self.observation_base**idx)*observation_vect[idx]
 
-        return observation_int
-    
+    def __observation_space_encoder(self, observation_vect):
+        # observation_int = 0
+        # for idx in range(len(observation_vect)):
+        #     observation_int += (self.observation_base ** idx) * observation_vect[idx]
+
+        return np.vstack((self.info['spectrum_data'][0:self.samples_per_step].real,
+                         self.info['spectrum_data'][0:self.samples_per_step].imag))
+
     def __get_entity_actions_and_observation(self):
         # Get each entities actions and determine the observation space.
         entity_idx = 0

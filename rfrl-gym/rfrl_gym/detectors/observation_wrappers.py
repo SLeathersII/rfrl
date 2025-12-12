@@ -1,6 +1,6 @@
 from ..envs import RFRLGymIQEnv2
 from typing import TYPE_CHECKING, Any, Generic, SupportsFloat, TypeVar, Union
-from gymnasium.spaces import Box, Discrete, Space
+from gymnasium.spaces import Box, Discrete, Space, MultiBinary
 from gymnasium import Env, Wrapper
 from .detector import Detector
 import numpy as np
@@ -35,11 +35,13 @@ class Sensor(Wrapper[WrapperObsType, ActType, ObsType, ActType]):
         Wrapper.__init__(self, env)
         if isinstance(space, Space):
             self.observation_space = space
-        elif space in ['detect', 'classify']:
-            if space == 'detect':
-                self.observation_space = Discrete(2**env.unwrapped.num_channels)  # binary for bins
-            elif space == 'classify':
-                self.observation_space = Discrete((1+env.unwrapped.num_entities)**env.unwrapped.num_channels)
+        # elif space in ['detect', 'classify']:
+        #     if space == 'detect':
+        #         self.observation_space = Discrete(2**env.unwrapped.num_channels)  # binary for bins
+        #     elif space == 'classify':
+        #         self.observation_space = Discrete((1+env.unwrapped.num_entities)**env.unwrapped.num_channels)
+        else:
+            self.observation_space = MultiBinary(self.env.unwrapped.num_channels)
 
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
@@ -112,9 +114,13 @@ class EnergyDetector(Sensor):
 
     def observation(self, signal_data: ObsType) -> WrapperObsType:
         phase_shift_base = -1j*2*np.pi*self.env.unwrapped.t
+        # convert Box signal data into a complex array
+        signal_data_step = np.empty(signal_data.shape[1], dtype=np.complex128)
+        signal_data_step.real = signal_data[0]
+        signal_data_step.imag = signal_data[1]
         sensing_history = []
         for k in range(self.env.unwrapped.num_channels):
-            data = signal_data * np.exp(phase_shift_base*self.env.unwrapped.fc[k])
+            data = signal_data_step * np.exp(phase_shift_base*self.env.unwrapped.fc[k])
             filtered = signal.sosfilt(self.sos_filter, data)
             downsampled = filtered[::self.env.unwrapped.num_channels]
             sensed_result = np.sum(np.abs(downsampled)**2.0)\
@@ -123,7 +129,8 @@ class EnergyDetector(Sensor):
             # turn the sensed_result into binary based on threshold
             sensing_history.append((sensed_result > self.threshold)*1)
         self.env.unwrapped.info['observation_history'][self.env.unwrapped.info['step_number']] = sensing_history
-        return self._observation_space_encoder(sensing_history)
+        #return self._observation_space_encoder(sensing_history)
+        return sensing_history
 
 class OracleMap(Sensor):
     def __init__(self, env: Env[ObsType, ActType],
@@ -141,16 +148,15 @@ class OracleMap(Sensor):
             self.observation_base = 2
         elif space == 'classify':
             self.observation_base = 1 + env.unwrapped.num_entities
-
+        self.observation_space = MultiBinary(env.unwrapped.num_channels)
     def _observation_space_encoder(self, observation_vect):
-        observation_int = 0
-        for idx in range(len(observation_vect)):
-            observation_int += (self.observation_base ** idx) * observation_vect[idx]
-        return int(observation_int)
+        # observation_int = 0
+        # for idx in range(len(observation_vect)):
+        #     observation_int += (self.observation_base ** idx) * observation_vect[idx]
+        # return int(observation_int)
+        return self.env.unwrapped._get_true_step_occupancy()
 
     def observation(self, signal_data: ObsType) -> WrapperObsType:
         true_history_step = self.env.unwrapped._get_true_step_occupancy()
-
-
         self.env.unwrapped.info['observation_history'][self.env.unwrapped.info['step_number']] = true_history_step
-        return self._observation_space_encoder(true_history_step)
+        return true_history_step # self._observation_space_encoder(true_history_step)

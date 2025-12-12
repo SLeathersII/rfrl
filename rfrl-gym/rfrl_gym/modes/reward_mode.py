@@ -28,7 +28,7 @@ class RewardMode(Wrapper[ObsType, ActType, ObsType, ActType]):
     ) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """Modifies the :attr:`env` :meth:`step` reward using :meth:`self.reward`."""
         observation, reward, terminated, truncated, info = self.env.step(action)
-        return observation, self.reward(action-1), terminated, truncated, info
+        return observation, self.reward(action), terminated, truncated, info
 
     def reward(self, reward: SupportsFloat) -> SupportsFloat:
         """Returns a modified environment ``reward``.
