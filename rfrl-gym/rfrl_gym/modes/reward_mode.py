@@ -16,10 +16,11 @@ class RewardMode(Wrapper[ObsType, ActType, ObsType, ActType]):
     """
 
     # todo specify rfrl_gym to lint the base variables
-    def __init__(self, env: Env[ObsType, ActType]):
+    def __init__(self, env: Env[ObsType, ActType], oracle: bool = False):
         """Constructor for the Reward wrapper.
         Args:
             env: Environment to be wrapped.
+            oracle: boolean determining if reward is based on sensor output or ground truth
         """
         Wrapper.__init__(self, env)
 
