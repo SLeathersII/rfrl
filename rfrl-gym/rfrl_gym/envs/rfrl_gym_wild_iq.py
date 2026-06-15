@@ -4,6 +4,7 @@ import json
 import numpy as np
 from IPython.utils.wildcard import is_type
 from PyQt6.QtWidgets import QApplication
+from IQ_Dataset import IQ_Dataset # used for real data
 import rfrl_gym.renderers
 import rfrl_gym.detectors
 import rfrl_gym.entities
@@ -12,7 +13,7 @@ from ..pywaspgen.burst_def import BurstDef
 from ..pywaspgen.iq_datagen import IQDatagen
 
 
-class RFRLGymIQEnv2(gym.Env):
+class RFRLGymIQEnv3(gym.Env):
     metadata = {'render_modes': ['null', 'terminal', 'pyqt'], 'render_fps': 4,
                 'reward_modes': ['dsa', 'jam'],
                 'observation_modes': ['detect', 'classify']}
@@ -37,6 +38,14 @@ class RFRLGymIQEnv2(gym.Env):
         self.observation_mode = self.scenario_metadata['environment']['observation_mode']
         self.reward_mode = self.scenario_metadata['environment']['reward_mode']
         self.target_entity = self.scenario_metadata['environment']['target_entity']
+        # generate the IQ_Dataset
+        self.data_path = [self.scenario_metadata['environment']['data_path']]
+        self.iq_ds = IQ_Dataset(self.data_path, window=self.samples_per_step)
+
+
+
+
+
         detector_gen = rfrl_gym.detectors.DetectorGenerator(self.scenario_metadata)
         self.detector = detector_gen.detector_out()
         self.t = np.linspace(0, self.samples_per_step, self.samples_per_step)
@@ -98,7 +107,7 @@ class RFRLGymIQEnv2(gym.Env):
 
     def agent_iq(self, action):
         """
-        method to generate the agent BurstDef on step -- can be overloaded to accommodate different action spaces
+        method to generate the agent BurstDef on step -- can be overloaded to accomadate different action spaces
         Args:
             action: agent action passed in on step
         Returns: agent BurstDef
@@ -134,7 +143,12 @@ class RFRLGymIQEnv2(gym.Env):
                 pass
 
         signal_data, self.user_burst_list = self.signal_generator.gen_iqdata([burst_list])
-        # print(len(self.user_burst_list[0]), len(burst_list))
+        ## add in the recorded data to the IQ on each step
+        #print(signal_data[0][:10], signal_data[0].shape)
+        recorded_step_data = self.iq_ds.__getitem__(self.info['step_number'])[0]
+        #print(recorded_step_data[:10], recorded_step_data.shape)
+        signal_data[0] += recorded_step_data.numpy()
+        #print(signal_data[0][:10], signal_data[0].shape)
         return signal_data, action_history_step
 
     def step(self, action):
