@@ -18,3 +18,7 @@ register(
 register(id='rfrl-gym-iq-v0.1',
     entry_point='rfrl_gym.envs:RFRLGymIQEnv2',
     max_episode_steps = 1000)
+
+register(id='rfrl-gym-wild-iq-v0',
+    entry_point='rfrl_gym.envs:RFRLGymIQEnv3',
+    max_episode_steps = 1000)
