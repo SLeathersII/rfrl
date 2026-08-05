@@ -7,6 +7,85 @@ import rfrl_gym.renderers
 import rfrl_gym.entities
 
 class RFRLGymAbstractEnv(gym.Env):
+    """
+Abstract reinforcement learning environment for Radio Frequency (RF) scenarios using Gymnasium.
+
+This class loads scenario configurations from a specified JSON file to initialize 
+the environment's channels, entities, rendering, and action/observation spaces.
+
+Parameters
+----------
+scenario_filename : str
+    The filename of the JSON scenario configuration file. This file must be located 
+    in the 'scenarios/' directory relative to the execution path. See `Notes` for 
+    the detailed structure of this JSON file.
+num_episodes : int, optional
+    The number of episodes to run in the environment. Default is 1.
+
+Attributes
+----------
+num_episodes : int
+    Number of episodes for the environment run.
+scenario_metadata : dict
+    The raw parsed JSON dictionary containing all scenario configurations.
+num_channels : int
+    Number of available RF channels in the environment.
+max_steps : int
+    The maximum number of steps allowed per episode.
+observation_mode : {'detect', 'classify'}
+    The type of observations returned to the agent.
+reward_mode : {'dsa', 'jam'}
+    The reward structure used for the agent.
+target_entity : str
+    The dictionary key/label of the target entity from the scenario file.
+entity_list : list
+    A list of initialized entity objects instantiated from `rfrl_gym.entities`.
+target_idx : int
+    The internal numerical index assigned to the target entity.
+num_entities : int
+    The total number of entities instantiated in the environment.
+render_mode : {'null', 'terminal', 'pyqt'}
+    The method used for rendering the environment.
+render_fps : int
+    Frames per second to use when rendering the environment.
+next_frame_time : int
+    Internal tracker for rendering timing.
+pyqt_app : PyQt5.QtWidgets.QApplication
+    The PyQt application instance, initialized only if `render_mode` is 'pyqt'.
+action_space : gym.spaces.Discrete
+    The discrete action space, sized `1 + num_channels`.
+observation_base : int
+    The base value used to calculate the observation space size (2 for 'detect', 
+    `1 + num_entities` for 'classify').
+observation_space : gym.spaces.Discrete
+    The discrete observation space, sized `observation_base ** num_channels`.
+
+Notes
+-----
+The `scenario_filename` parameter points to a JSON file that must contain the following 
+hierarchical structure and keys:
+
+* **`environment`** (dict): Contains global environment parameters.
+    * `num_channels` (int): Number of RF channels available in the environment.
+    * `max_steps` (int): Maximum number of steps allowed per episode.
+    * `observation_mode` (str): Must be either 'detect' or 'classify'.
+    * `reward_mode` (str): Must be either 'dsa' or 'jam'.
+    * `target_entity` (str): The string identifier of the target entity. This must 
+      exactly match one of the keys defined in the `entities` block.
+
+* **`entities`** (dict): A dictionary where each key is an entity's label (str), and 
+  the value is a nested dictionary of parameters for that specific entity.
+    * `type` (str): The exact class name of the entity as it appears in 
+      the `rfrl_gym.entities` module (e.g., 'PrimaryUser', 'Jammer').
+    * `[additional parameters]`: Any other keys provided in this nested dictionary 
+      will be parsed and passed as keyword arguments (`kwargs`) directly to the 
+      entity's constructor.
+
+* **`render`** (dict): Contains rendering configurations for the Gym environment.
+    * `render_mode` (str): Must match one of the supported modes: 'null', 'terminal', or 'pyqt'.
+    * `render_fps` (int): Target frames per second for the renderer.
+"""
+
     metadata = {'render_modes': ['null', 'terminal', 'pyqt'], 'render_fps':4,
                     'reward_modes': ['dsa', 'jam'],
                     'observation_modes': ['detect', 'classify']}
