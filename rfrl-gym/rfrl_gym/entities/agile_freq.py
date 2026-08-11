@@ -21,7 +21,7 @@ class AgileFreq(Entity):
         The total number of the discretized baseband environment frequency bins.
     channels : list of int or np.ndarray
         The specific subset of frequency channel indices within which this entity is 
-        authorized or hardware-capable of operating.
+        authorized or hardware-capable of operating. (Currently not integrated with this Entity!)
     onoff : list of int, default=[1, 1, 0]
         A structural parameter vector `[x, y, z]` regulating the duty-cycle state machine:
         
