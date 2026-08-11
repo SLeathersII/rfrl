@@ -179,6 +179,7 @@ class RFRLGymIQEnv2(gym.Env):
 
     def _get_true_step_occupancy(self):
         "must be run after action_history has been updated for step"
+        #TODO fix issue where ground truth does not consider channel occupancy outside of center frequency.
         true_history_step = np.zeros(self.num_channels)
         for key, value in self.info['action_history'].items():
             if value[self.info['step_number']] != -1 and key != 'user_agent':

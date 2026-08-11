@@ -220,9 +220,11 @@ class Jam(RewardMode):
         if action == -1:
             reward = 0
         else:
-            # get target idx from action_history
+            # Extract the current channel index occupied by the targeted communications entity
             target_idx = self.env.unwrapped.info['action_history'][self.env.unwrapped.target_entity][self.env.unwrapped.info['step_number']]
+            # Map structural alignment to binary payoff space: True (1) -> +1.0, False (0) -> -1.0 and 
             reward = int(2.0 * (target_idx == action) -1.0)
+        
         self.env.unwrapped.info['reward_history'][self.env.unwrapped.info['step_number']] = reward
         self.env.unwrapped.info['cumulative_reward'][self.env.unwrapped.info['step_number']] = np.sum(
             self.env.unwrapped.info['reward_history'])

@@ -85,6 +85,8 @@ class EntityGenerator():
     def get_entity_list(self):
         return self.entity_list
 
+
+    # TODO -- implement methods to support deterministic scene generation (awaiting memory/compute optimizations) better for many runs of same scene
     def gen_scene(self):
         """
         generates the IQ for the entire scene from the deterministic entities
