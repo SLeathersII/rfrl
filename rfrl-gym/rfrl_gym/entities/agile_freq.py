@@ -38,8 +38,8 @@ class AgileFreq(Entity):
         The absolute discrete environment timestep marking when this entity terminates execution 
         and permanently ceases spectral footprint generations.
     modem_params : dict, optional
-        Physical-layer configuration payload for deterministic in-phase and quadrature (I/Q) 
-        signal generation, containing the following keys:
+        Physical-layer signal parameter dictionary fed into PyWaspgen for downstream digital 
+        waveform synthesis. Required key-value pairs include:
         
         * ``type`` (str): Digital modulation scheme (e.g., 'qam', 'psk', 'ask').
         * ``order`` (int): number of symbols.
@@ -60,7 +60,8 @@ class AgileFreq(Entity):
     --------
     RewardMode : For tracking the downstream objective optimization metrics of these transitions.
     """
-    def __init__(self, entity_label, num_channels, channels, onoff=[1,1,0], start=None, stop=None, modem_params=None):
+    def __init__(self, entity_label:str, num_channels: int, channels: list, onoff: list = [1,1,0],
+                 start: int = None, stop: int = None, modem_params: dict = None,):
         """Initialize the spectrum-agile frequency-hopping entity."""
         super().__init__(entity_label, num_channels, channels, onoff, start, stop, modem_params)
     
@@ -114,7 +115,7 @@ class AgileFreq(Entity):
             return self.current_channel
 
     def _reset(self):
-        """Reset the entity's internal state machine and sample a stochastic initial channel.
+        """Reset the entity and sample a stochastic initial channel.
 
         Restores baseline parameters at the episode boundary, evaluating a uniformly 
         distributed random initial condition across the entity's allocated operational spectrum.
