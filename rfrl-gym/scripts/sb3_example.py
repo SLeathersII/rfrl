@@ -1,6 +1,6 @@
 import gymnasium as gym
 import argparse
-
+import rfrl_gym
 from stable_baselines3 import DQN
 
 parser = argparse.ArgumentParser()
@@ -33,4 +33,4 @@ rewards = []
 while not terminated and not truncated:
     action, _states = model.predict(obs, deterministic=True)
     obs, reward, terminated, truncated, info = env.step(action)
-    #env.render()
+    env.render()

@@ -172,9 +172,13 @@ hierarchical structure and keys:
             episode_number = -1
             episode_reward = np.array([], dtype=float)
             if self.render_mode == 'terminal':
-                self.renderer = rfrl_gym.renderers.terminal_renderer.TerminalRenderer(self.num_episodes, self.scenario_metadata)
+                self.renderer = rfrl_gym.renderers.terminal_renderer.TerminalRenderer(self.num_episodes,
+                                                                                      self.scenario_metadata)
             if self.render_mode == 'pyqt':
-                self.renderer = rfrl_gym.renderers.pyqt_renderer.PyQtRenderer(self.num_episodes, self.scenario_metadata, mode='abstract')
+                self.renderer = rfrl_gym.renderers.pyqt_renderer.PyQtRenderer(self.num_episodes,
+                                                                              self.scenario_metadata,
+                                                                              mode='abstract',
+                                                                              samples_per_step=10000)
             if self.render_mode != 'null':
                 self.renderer.reset()
         elif hasattr(self, 'info') and options['reset_type'] == 'soft':

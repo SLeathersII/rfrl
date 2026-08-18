@@ -174,6 +174,9 @@ class RFRLGymIQEnv2(gym.Env):
         for entity in self.entity_list:
             entity_action = entity.get_action(self.info)
             action_history_step[entity.entity_label] = entity_action
+
+        for key, value in action_history_step.items():
+            self.info['action_history'][key][self.info['step_number']] = value
         return action_history_step
 
     def _get_true_step_occupancy(self):
@@ -197,7 +200,7 @@ class RFRLGymIQEnv2(gym.Env):
     def iq_gen(self):
         """
         update burst list on step with entity and agent actions
-        Returns: signal_data, action_history_step
+        Returns: signal_data
 
         """
         burst_list = []
@@ -224,16 +227,14 @@ class RFRLGymIQEnv2(gym.Env):
 
         signal_data, self.user_burst_list = self.signal_generator.gen_iqdata([burst_list])
         # print(len(self.user_burst_list[0]), len(burst_list))
-        return signal_data, action_history_step
+        return signal_data
 
     def step(self, action):
-        #action -= 1
         self.info['step_number'] += 1
         self.info['action_history']["user_agent"][self.info['step_number']] = action
         # call gen iq to get signal data and entity ground truth
-        signal_data, action_history_step = self.iq_gen()
-        for key, value in action_history_step.items():
-            self.info['action_history'][key][self.info['step_number']] = value
+        signal_data = self.iq_gen()
+
         self.info['true_history'][self.info['step_number']] = self._get_true_step_occupancy()
         self.info['spectrum_data'] = np.roll(self.info['spectrum_data'], self.samples_per_step, axis=0)
         #self.info['spectrum_data'][0:self.samples_per_step] += signal_data[0]
@@ -287,9 +288,7 @@ class RFRLGymIQEnv2(gym.Env):
         for entity in self.entity_list:
             entity.reset(self.info)
 
-        signal_data, action_history_step = self.iq_gen()
-        for key, value in action_history_step.items():
-            self.info['action_history'][key][self.info['step_number']] = value
+        signal_data= self.iq_gen()
         self.info['true_history'][self.info['step_number']] = self._get_true_step_occupancy()
         # Instantiate the spectrum of samples and then use Pywaspgen to generate the initial bursts
         # This is mostly to create the size needed to work with PyQt Renderer

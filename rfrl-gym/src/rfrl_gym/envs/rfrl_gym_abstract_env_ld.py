@@ -130,18 +130,20 @@ class RFRLGymAbstractEnv_LD(gym.Env):
 
     def step(self, action):
         self.info['step_number'] += 1
-        self.info['action_history'][0][self.info['step_number']] = action
+        self.info['action_history']["user_agent"][self.info['step_number']] = action
 
         # Get entity actions and determine player observation.
         self.info['true_history'][self.info['step_number']], self.info['observation_history'][self.info['step_number']]\
-            = self.state_spaces[0],self.state_spaces[0] # look at first row of states
+            = self.__get_entity_actions_and_observation()# look at first row of states
         # roll state space into next step
         self.state_spaces = np.roll(self.state_spaces, 1, axis=0)
         # Calculate the player reward.
         if self.reward_mode == 'dsa':
-            self.info['reward_history'][self.info['step_number']] = 2.0*int(self.info['true_history'][self.info['step_number']][action]==0)-1.0
+            self.info['reward_history'][self.info['step_number']] =\
+                2.0*int(self.info['true_history'][self.info['step_number']][action]==0)-1.0
         elif self.reward_mode == 'jam':
-            self.info['reward_history'][self.info['step_number']] = 2.0*int(self.info['true_history'][self.info['step_number']][action]==self.target_idx)-1.0
+            self.info['reward_history'][self.info['step_number']] =\
+                2.0*int(self.info['true_history'][self.info['step_number']][action]==self.target_idx)-1.0
         self.info['cumulative_reward'][self.info['step_number']] = np.sum(self.info['reward_history'])
               
         # Update return variables and run the render.
@@ -149,7 +151,8 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         reward = self.info['reward_history'][self.info['step_number']]
         done = False
         if self.info['step_number'] == self.max_steps:
-            self.info['episode_reward'] = np.append(self.info['episode_reward'], self.info['cumulative_reward'][self.info['step_number']])
+            self.info['episode_reward'] = np.append(self.info['episode_reward'],
+                                                    self.info['cumulative_reward'][self.info['step_number']])
             done = True
 
         return int(observation), reward, done, done, self.info
@@ -161,9 +164,13 @@ class RFRLGymAbstractEnv_LD(gym.Env):
             episode_number = -1
             episode_reward = np.array([], dtype=float)
             if self.render_mode == 'terminal':
-                self.renderer = rfrl_gym.renderers.terminal_renderer.TerminalRenderer(self.num_episodes, self.scenario_metadata)
+                self.renderer = rfrl_gym.renderers.terminal_renderer.TerminalRenderer(self.num_episodes,
+                                                                                      self.scenario_metadata)
             if self.render_mode == 'pyqt':
-                self.renderer = rfrl_gym.renderers.pyqt_renderer.PyQtRenderer(self.num_episodes, self.scenario_metadata, mode='abstract')
+                self.renderer = rfrl_gym.renderers.pyqt_renderer.PyQtRenderer(self.num_episodes,
+                                                                              self.scenario_metadata,
+                                                                              mode='abstract',
+                                                                              samples_per_step=10000)
             if self.render_mode != 'null':
                 self.renderer.reset()
         elif hasattr(self, 'info') and options['reset_type'] == 'soft':
@@ -179,8 +186,11 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         self.info['num_emitters'] = self.num_emitters
         self.info['num_episodes'] = self.num_episodes
         self.info['episode_reward'] = episode_reward  
-        self.info['episode_number'] = episode_number + 1   
-       # self.info['action_history'] = -1+np.zeros((self.num_entities+1, self.max_steps+1), dtype=int)
+        self.info['episode_number'] = episode_number + 1
+        # todo consider way to make dynamic if we have multiple agents in scene
+        self.info['action_history'] = {"user_agent": -1 + np.zeros(self.max_steps + 1, dtype=int)}
+        for entity in self.entity_list:
+            self.info['action_history'][entity.entity_label] = -1 + np.zeros(self.max_steps + 1, dtype=int)
         self.info['true_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['observation_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['reward_history'] = np.zeros(self.max_steps+1, dtype=float)
@@ -240,6 +250,7 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         # Get each entities actions and determine the observation space.
         entity_idx = 0
         true_observation = np.zeros(self.num_channels, dtype=int)
+        action_history_step = {}
         for entity in self.entity_list:
             entity_idx += 1
             entity_action = entity.get_action(self.info)

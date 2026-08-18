@@ -12,6 +12,12 @@ register(
 )
 
 register(
+    id='rfrl-gym-abstract-v0.1',
+    entry_point='rfrl_gym.envs:RFRLGymAbstractEnv_LD',
+    max_episode_steps = 1000
+)
+
+register(
     id='rfrl-gym-iq-v0',
     entry_point='rfrl_gym.envs:RFRLGymIQEnv',
     max_episode_steps = 1000

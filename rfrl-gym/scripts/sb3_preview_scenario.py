@@ -11,9 +11,9 @@ parser.add_argument('-e', '--epochs', default=100, type=int, help='Number of tra
 args = parser.parse_args()
 
 if args.gym_mode == 'abstract':
-    env = gym.make('rfrl-gym-abstract-v0', scenario_filename=args.scenario)
+    env = gym.make('rfrl-gym-abstract-v0.1', scenario_filename=args.scenario)
 elif args.gym_mode == 'iq':
-    env = gym.make('rfrl-gym-iq-v0', scenario_filename=args.scenario)
+    env = gym.make('rfrl-gym-iq-v0.1', scenario_filename=args.scenario)
 
 model = DQN("MlpPolicy", env, verbose=1, exploration_initial_eps=1.0, exploration_final_eps=0.001,exploration_fraction=0.995)
 
