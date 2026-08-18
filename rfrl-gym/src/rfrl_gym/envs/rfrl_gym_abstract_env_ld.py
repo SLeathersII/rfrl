@@ -254,7 +254,8 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         for entity in self.entity_list:
             entity_idx += 1
             entity_action = entity.get_action(self.info)
-            self.info['action_history'][entity_idx][self.info['step_number']] = entity_action
+            action_history_step[entity.entity_label] = entity_action
+            self.info['action_history'][entity][self.info['step_number']] = entity_action
             # If two or more entities' actions are to choose the same channel, set the observation to the number of entities + 1.
             if entity_action != -1:
                 if true_observation[entity_action] == 0:

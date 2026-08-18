@@ -174,9 +174,8 @@ class RFRLGymIQEnv2(gym.Env):
         for entity in self.entity_list:
             entity_action = entity.get_action(self.info)
             action_history_step[entity.entity_label] = entity_action
+            self.info['action_history'][entity.entity_label][self.info['step_number']] = entity_action
 
-        for key, value in action_history_step.items():
-            self.info['action_history'][key][self.info['step_number']] = value
         return action_history_step
 
     def _get_true_step_occupancy(self):
