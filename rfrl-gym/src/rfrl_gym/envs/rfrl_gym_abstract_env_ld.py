@@ -115,7 +115,9 @@ class RFRLGymAbstractEnv_LD(gym.Env):
             self.pyqt_app = QApplication([])
 
         # generate state space for learning dynamics from function
-        self.num_emitters = self.scenario_metadata['entities']['num_emitters']
+       # print(f"keys:{self.scenario_metadata['entities'].keys()}\nshape:{len(self.scenario_metadata['entities'])}")
+        self.num_emitters = len(self.scenario_metadata['entities'])
+        print(f"self.scenario_metadata['entities']:{self.scenario_metadata['entities']}")
         self.num_states = self.scenario_metadata['entities']['num_states']
         self.seed = self.scenario_metadata['entities']['seed']
         self.state_spaces = self.gen_states(channels=self.num_channels, emitters=self.num_emitters,
@@ -227,17 +229,25 @@ class RFRLGymAbstractEnv_LD(gym.Env):
 
     def __validate_scenario_metadata(self):
         # Validate scenario environment parameters.
-        assert self.scenario_metadata['environment']['num_channels'] > 0, 'Environment parameter \'num_channels\' is invalid.'
-        assert self.scenario_metadata['environment']['max_steps'] > 0, 'Environment parameter \'max_steps\' is invalid.'
-        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], 'Invalid observation mode. Must be one of the following options: {}'.format(self.metadata["observation_modes"])
-        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'], 'Invalid reward mode. Must be one of the following options: {}'.format(self.metadata["reward_modes"])
+        assert self.scenario_metadata['environment']['num_channels'] > 0, "Environment parameter 'num_channels'\
+                                                                                                            is invalid."
+        assert self.scenario_metadata['environment']['max_steps'] > 0, "Environment parameter 'max_steps' is invalid."
+        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], \
+            f'Invalid observation mode. Must be one of the following options: {self.metadata["observation_modes"]}'
+        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'],\
+            f'Invalid reward mode. Must be one of the following options: {self.metadata["reward_modes"]}'
         if self.scenario_metadata['environment']['reward_mode'] == 'jam':
-            assert self.scenario_metadata['environment']['target_entity'] in self.scenario_metadata['entities'].keys() or self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name. Must correspond to the name of one of the entity labels in the scenario file.'
-        
+            assert self.scenario_metadata['environment']['target_entity'] in\
+                   self.scenario_metadata['entities'].keys() or\
+                   self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name.\
+                    Must correspond to the name of one of the entity labels in the scenario file.'
+
         # Validate scenario render parameters.
-        assert self.scenario_metadata['render']['render_mode'] is None or self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'], 'Invalid render mode. Must be one of the following options: {}'.format(self.metadata["render_modes"])
-        assert self.scenario_metadata['render']['render_fps'] > 0, 'Render parameter \'render_fps\' is invalid.'
-        assert self.scenario_metadata['render']['render_history'] > 0, 'Render parameter \'render_history\' is invalid.'
+        assert self.scenario_metadata['render']['render_mode'] is None or\
+               self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'],\
+            f'Invalid render mode. Must be one of the following options: {self.metadata["render_modes"]}'
+        assert self.scenario_metadata['render']['render_fps'] > 0, "Render parameter 'render_fps' is invalid."
+        assert self.scenario_metadata['render']['render_history'] > 0, "Render parameter 'render_history' is invalid."
     
     def __observation_space_encoder(self, observation_vect):
         observation_int = 0
@@ -255,7 +265,7 @@ class RFRLGymAbstractEnv_LD(gym.Env):
             entity_idx += 1
             entity_action = entity.get_action(self.info)
             action_history_step[entity.entity_label] = entity_action
-            self.info['action_history'][entity][self.info['step_number']] = entity_action
+            self.info['action_history'][entity.entity_label][self.info['step_number']] = entity_action
             # If two or more entities' actions are to choose the same channel, set the observation to the number of entities + 1.
             if entity_action != -1:
                 if true_observation[entity_action] == 0:
@@ -275,7 +285,9 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         states = set() # empty set to hold states
         rng = np.random.default_rng(seed=seed)
         # combinotoric check
-        assert num_states <= math.comb(channels, emitters), f'Error: For {channels} channels and {emitters} emitters there are only {math.comb(channels, emitters)} unique states to choose from given deterministic transitions'
+        assert num_states <= math.comb(channels, emitters), f'Error: For {channels} channels and {emitters}\
+         emitters there are only {math.comb(channels, emitters)} unique states\
+          to choose from given deterministic transitions'
         while len(states) < num_states:
             # IF non deterministic we don't have to check for duplicates -- should develop method for controlled Stochasticity
             idx = tuple(sorted(rng.choice(range(channels), size=emitters, replace=False)))

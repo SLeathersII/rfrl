@@ -229,17 +229,25 @@ hierarchical structure and keys:
 
     def __validate_scenario_metadata(self):
         # Validate scenario environment parameters.
-        assert self.scenario_metadata['environment']['num_channels'] > 0, 'Environment parameter \'num_channels\' is invalid.'
-        assert self.scenario_metadata['environment']['max_steps'] > 0, 'Environment parameter \'max_steps\' is invalid.'
-        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], 'Invalid observation mode. Must be one of the following options: {}'.format(self.metadata["observation_modes"])
-        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'], 'Invalid reward mode. Must be one of the following options: {}'.format(self.metadata["reward_modes"])
+        assert self.scenario_metadata['environment']['num_channels'] > 0, "Environment parameter 'num_channels'\
+                                                                                                            is invalid."
+        assert self.scenario_metadata['environment']['max_steps'] > 0, "Environment parameter 'max_steps' is invalid."
+        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], \
+            f'Invalid observation mode. Must be one of the following options: {self.metadata["observation_modes"]}'
+        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'], \
+            f'Invalid reward mode. Must be one of the following options: {self.metadata["reward_modes"]}'
         if self.scenario_metadata['environment']['reward_mode'] == 'jam':
-            assert self.scenario_metadata['environment']['target_entity'] in self.scenario_metadata['entities'].keys() or self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name. Must correspond to the name of one of the entity labels in the scenario file.'
-        
+            assert self.scenario_metadata['environment']['target_entity'] in \
+                   self.scenario_metadata['entities'].keys() or \
+                   self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name.\
+                            Must correspond to the name of one of the entity labels in the scenario file.'
+
         # Validate scenario render parameters.
-        assert self.scenario_metadata['render']['render_mode'] is None or self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'], 'Invalid render mode. Must be one of the following options: {}'.format(self.metadata["render_modes"])
-        assert self.scenario_metadata['render']['render_fps'] > 0, 'Render parameter \'render_fps\' is invalid.'
-        assert self.scenario_metadata['render']['render_history'] > 0, 'Render parameter \'render_history\' is invalid.'
+        assert self.scenario_metadata['render']['render_mode'] is None or \
+               self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'], \
+            f'Invalid render mode. Must be one of the following options: {self.metadata["render_modes"]}'
+        assert self.scenario_metadata['render']['render_fps'] > 0, "Render parameter 'render_fps' is invalid."
+        assert self.scenario_metadata['render']['render_history'] > 0, "Render parameter 'render_history' is invalid."
     
     def __observation_space_encoder(self, observation_vect):
         observation_int = 0
