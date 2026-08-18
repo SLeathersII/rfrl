@@ -1,7 +1,5 @@
 import gymnasium as gym
 import argparse
-import matplotlib.pyplot as plt
-import rfrl_gym
 import time
 
 from stable_baselines3 import DQN

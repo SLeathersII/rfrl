@@ -1,13 +1,6 @@
 import gymnasium as gym
-from stable_baselines3 import DQN
-import rfrl_gym
-from train_utils import OnlineCallbackDqn
-import numpy as np
-import matplotlib.pyplot as plt
 from rfrl_gym.detectors.observation_wrappers import EnergyDetector
 from rfrl_gym.modes.reward_mode import DSA
-import pywaspgen
-from stable_baselines3 import DQN
 
 env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='NAWC_test_scenario.json',
                pywasp_config = "pywaspgen/configs/default.json",

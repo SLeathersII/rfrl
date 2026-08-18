@@ -1,6 +1,5 @@
 import gymnasium as gym
 from stable_baselines3 import DQN
-import rfrl_gym
 from train_utils import OnlineCallbackDqn
 from rfrl_gym.modes.reward_mode import *
 from rfrl_gym.detectors.observation_wrappers import *

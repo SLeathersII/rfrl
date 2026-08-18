@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/pywaspgen.iml" filepath="$PROJECT_DIR$/.idea/pywaspgen.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/rfrl.iml" filepath="$PROJECT_DIR$/.idea/rfrl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/rfrl-gym.iml" filepath="$PROJECT_DIR$/.idea/rfrl-gym.iml" />
+    </modules>
+  </component>
+</project>

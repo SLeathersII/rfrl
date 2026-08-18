@@ -1,5 +1,4 @@
 import gymnasium as gym
-import rfrl_gym
 import argparse
 import json
 import random

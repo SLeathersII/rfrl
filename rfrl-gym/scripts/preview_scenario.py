@@ -1,7 +1,6 @@
 import gymnasium as gym
 import time
 import argparse
-import rfrl_gym
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--scenario', default='test.json', type=str, help='The scenario file to preview in the RFRL gym environment.')

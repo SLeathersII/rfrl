@@ -1,37 +1,24 @@
 import gymnasium as gym
-from stable_baselines3 import DQN
 import rfrl_gym
+from stable_baselines3 import DQN
 from train_utils import OnlineCallbackDqn
-import numpy as np
-import matplotlib.pyplot as plt
 from rfrl_gym.detectors.observation_wrappers import *
 from rfrl_gym.modes.reward_mode import *
-import pywaspgen
-from stable_baselines3 import DQN
-from train_utils import OnlineCallbackDqn
 
-# import matplotlib.pyplot as plt
-# import json
-# import os
-# import time
-# import random
-# from train_utils import OnlineCallbackDqn
-# from data_utils import Sb3_DataClass
 
 # intilize environment through gym, specifying our scenario json
 # env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='NAWC_test_scenario.json',
 #                pywasp_config = "pywaspgen/configs/default.json",
 #                num_episodes=10)
-env = gym.make('rfrl-gym-wild-iq-v0', scenario_filename='NAWC_test_scenario.json',
+env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
                pywasp_config = "pywaspgen/configs/default.json",
                num_episodes=10)
 
 env.reset() # intialize info
-env = EnergyDetector(env, 'detect') # apply sensor
-#env = DSA(env) # apply reward mode
-# env = OracleMap(env, 'detect')
+#env = EnergyDetector(env, 'detect') # apply sensor
+env = OracleMap(env, 'detect')
 #env = Jam(env)
-env = DSA(env)
+env = DSA(env) # apply reward mode
 env.reset()
 
 ocb = OnlineCallbackDqn(render=True)
