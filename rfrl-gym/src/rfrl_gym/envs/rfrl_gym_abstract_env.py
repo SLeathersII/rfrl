@@ -140,7 +140,7 @@ hierarchical structure and keys:
     def step(self, action):
         action -= 1
         self.info['step_number'] += 1
-        self.info['action_history'][0][self.info['step_number']] = action
+        self.info['action_history']["user_agent"][self.info['step_number']] = action
 
         # Get entity actions and determine player observation.
         self.info['true_history'][self.info['step_number']], self.info['observation_history'][self.info['step_number']] = self.__get_entity_actions_and_observation()     
@@ -167,6 +167,7 @@ hierarchical structure and keys:
 
     def reset(self, options={'reset_type':'soft'}, seed=None):
         # Temporarily store episode specific variables if they exist.
+        #Resets info dictionary/tracking variables
 
         if options == None:
             episode_number = -1
@@ -194,8 +195,11 @@ hierarchical structure and keys:
         self.info['num_entities'] = self.num_entities
         self.info['num_episodes'] = self.num_episodes
         self.info['episode_reward'] = episode_reward  
-        self.info['episode_number'] = episode_number + 1   
-        self.info['action_history'] = -1+np.zeros((self.num_entities+1, self.max_steps+1), dtype=int)
+        self.info['episode_number'] = episode_number + 1
+        # todo consider way to make dynamic if we have multiple agents in scene
+        self.info['action_history'] = {"user_agent": -1 + np.zeros(self.max_steps + 1, dtype=int)}
+        for entity in self.entity_list:
+            self.info['action_history'][entity.entity_label] = -1 + np.zeros(self.max_steps + 1, dtype=int)
         self.info['true_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['observation_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['reward_history'] = np.zeros(self.max_steps+1, dtype=float)
@@ -263,7 +267,7 @@ hierarchical structure and keys:
         for entity in self.entity_list:
             entity_idx += 1
             entity_action = entity.get_action(self.info)
-            self.info['action_history'][entity_idx][self.info['step_number']] = entity_action
+            self.info['action_history'][entity.entity_label][self.info['step_number']] = entity_action
             # If two or more entities' actions are to choose the same channel, set the observation to the number of entities + 1.
             if entity_action != -1:
                 if true_observation[entity_action] == 0:

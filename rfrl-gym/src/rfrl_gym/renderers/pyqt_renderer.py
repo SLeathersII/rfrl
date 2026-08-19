@@ -405,7 +405,7 @@ class PyQtRenderer(Renderer, QMainWindow):
             elif self.render_background == "black":
                 self.occupancy_image[channel, 0, :] = [0, 0, 0]
             channel_entity = self.info['observation_history'][self.info['step_number']][channel]
-            print(f'pyqt_renderer: info -- {self.info}')
+            #print(f'pyqt_renderer: info -- {self.info}')
             if self.info['action_history']['user_agent'][self.info['step_number']] == channel:
                 if channel_entity != 0:
                     self.occupancy_image[channel, 0, :] = [255, 0, 0]

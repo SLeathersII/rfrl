@@ -13,7 +13,7 @@ parser.add_argument('-e', '--epochs', default=200,
 args = parser.parse_args()
 
 if args.gym_mode == 'abstract':
-    env = gym.make('rfrl-gym-abstract-v0.1', scenario_filename=args.scenario)
+    env = gym.make('rfrl-gym-abstract-v0', scenario_filename=args.scenario)
 elif args.gym_mode == 'iq':
     env = gym.make('rfrl-gym-iq-v0.1', scenario_filename=args.scenario)
 env.reset()

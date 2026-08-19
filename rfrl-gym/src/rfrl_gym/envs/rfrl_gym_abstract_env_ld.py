@@ -7,9 +7,11 @@ from PyQt6.QtWidgets import QApplication
 import rfrl_gym.renderers
 import rfrl_gym.entities
 
+# learning dynamics
 class RFRLGymAbstractEnv_LD(gym.Env):
     """
     Abstract reinforcement learning environment for Radio Frequency (RF) scenarios using Gymnasium.
+    Focus on learning dynamics
     
     This class loads scenario configurations from a specified JSON file to initialize 
     the environment's channels, entities, rendering, and action/observation spaces.
