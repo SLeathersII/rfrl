@@ -7,39 +7,38 @@ from rfrl_gym.modes.reward_mode import *
 
 
 # intilize environment through gym, specifying our scenario json
-# env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='NAWC_test_scenario.json',
+env = gym.make('rfrl-gym-abstract-v0.1', render_mode='pyqt',
+               num_episodes=10)
+# env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
 #                pywasp_config = "pywaspgen/configs/default.json",
 #                num_episodes=10)
-env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
-               pywasp_config = "pywaspgen/configs/default.json",
-               num_episodes=10)
 
 env.reset() # intialize info
 #env = EnergyDetector(env, 'detect') # apply sensor
-env = OracleMap(env, 'detect')
+# env = OracleMap(env, 'detect')
 #env = Jam(env)
-env = DSA(env) # apply reward mode
-env.reset()
+# env = DSA(env) # apply reward mode
+# env.reset()
 
 ocb = OnlineCallbackDqn(render=True)
 model = DQN("MlpPolicy", env,
             verbose=1, exploration_initial_eps=1.0,
             exploration_final_eps=0.001,exploration_fraction=0.9)
 
-model = model.learn(total_timesteps=env.unwrapped.max_steps,
+model = model.learn(total_timesteps=env.unwrapped.max_steps*7, # epochs
                     callback=ocb,
                     log_interval=100,
                     progress_bar=True)
 
-# obs, info = env.reset()
-# terminated = truncated= False
-# running_reward = 0
-# rewards = []
-#
-# while not terminated and not truncated:
-#     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     env.render()
+obs, info = env.reset()
+terminated = truncated= False
+running_reward = 0
+rewards = []
+
+while not terminated and not truncated:
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, terminated, truncated, info = env.step(action)
+    env.render()
 
 # # plot 1
 # iq_gen = pywaspgen.IQDatagen("pywaspgen/configs/default.json")

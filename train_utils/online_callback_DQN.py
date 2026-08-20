@@ -74,9 +74,9 @@ class OnlineCallbackDqn(BaseCallback):
         """
         # get reward moving average to update OnlineSchedule
         info = self.locals['infos'][0]
-        idx = self.num_timesteps - 1
-        if idx >= 50:
-            rma = info['reward_history'][idx-50:idx].mean()
+        step_number = info['step_number']
+        if step_number >= 50:
+            rma = info['reward_history'][step_number-50:step_number].mean()
             if rma > self.epsilon_threshold:  # model has met convergence
                 if self.model.exploration_schedule.converged: # if already converged
                     pass

@@ -11,7 +11,8 @@ import rfrl_gym.entities
 class RFRLGymAbstractEnv_LD(gym.Env):
     """
     Abstract reinforcement learning environment for Radio Frequency (RF) scenarios using Gymnasium.
-    Focus on learning dynamics
+    Focus on learning dynamics. Creates an upper bound by looking at the reduced complexity of a perfectly sensed
+    grid world label map that assumes emitters do not
     
     This class loads scenario configurations from a specified JSON file to initialize 
     the environment's channels, entities, rendering, and action/observation spaces.
@@ -92,53 +93,65 @@ class RFRLGymAbstractEnv_LD(gym.Env):
                     'reward_modes': ['dsa', 'jam'],
                     'observation_modes': ['detect', 'classify']}
 
-    def __init__(self, scenario_filename,
+    def __init__(self,
+                 num_channels=10,
+                 num_emitters=7,
+                 num_states=10,
+                 max_steps: int=500,
+                 render_mode='null',
+                 reward_mode: str = 'dsa',
+                 seed=3,
+
                  num_episodes=1):
         self.num_episodes = num_episodes
-
-        # Load in the JSON scenario file and check for valid entries.
-        f_idx = open('scenarios/' + scenario_filename)
-        self.scenario_metadata = json.load(f_idx)
-        self.__validate_scenario_metadata()
         
         # Get the environment parameters from the scenario file.
-        self.num_channels = self.scenario_metadata['environment']['num_channels']
-        self.max_steps = self.scenario_metadata['environment']['max_steps']
-        self.observation_mode = self.scenario_metadata['environment']['observation_mode']
-        self.reward_mode = self.scenario_metadata['environment']['reward_mode']
-        self.target_entity = self.scenario_metadata['environment']['target_entity']
+        self.num_channels = num_channels
+        self.max_steps = max_steps
+        self.observation_mode = 'detect'
+        self.reward_mode = reward_mode
+        self.target_entity = "fixed_hop_freq" # TODO try and remove/avoid needing
 
         # Get the render parameters from the scenario file and initialize the render if necessary.
-        self.render_mode = self.scenario_metadata['render']['render_mode']
-        self.render_fps = self.scenario_metadata['render']['render_fps']
-        self.next_frame_time = 0
+        self.render_mode = render_mode.lower()
+        if self.render_mode!= 'null':
+            self.render_fps = 20
+            self.next_frame_time = 0
+            self.render_history = 20
+            render = {"render":{"render_mode":self.render_mode,
+                                "render_fps":self.render_fps,
+                                "render_history":self.render_history,
+                                "render_background":'black'}}
 
         if self.render_mode == 'pyqt':
             self.pyqt_app = QApplication([])
 
-        # generate state space for learning dynamics from function
-       # print(f"keys:{self.scenario_metadata['entities'].keys()}\nshape:{len(self.scenario_metadata['entities'])}")
-        self.num_emitters = len(self.scenario_metadata['entities'])
-        print(f"self.scenario_metadata['entities']:{self.scenario_metadata['entities']}")
-        self.num_states = self.scenario_metadata['entities']['num_states']
-        self.seed = self.scenario_metadata['entities']['seed']
+        # generate state space for learning dynamics from num_channels, num_emitters, and num_states\
+        # (number of states before repeating)
+        self.num_emitters = num_emitters
+        self.num_states = num_states
+        self.seed = seed
         self.state_spaces = self.gen_states(channels=self.num_channels, emitters=self.num_emitters,
                                             num_states=self.num_states , seed=self.seed)
         # Set the gym's valid action and observation spaces.
         self.action_space = gym.spaces.Discrete(self.num_channels)
         if self.observation_mode == 'detect':
             self.observation_base = 2
-        # elif self.observation_mode == 'classify':
-        #     self.observation_base = 1+self.num_entities
+
         self.observation_space = gym.spaces.Discrete(self.observation_base**self.num_channels)
+        environment = {'environment':{"num_channels":self.num_channels, "max_steps":self.max_steps,
+                                      "observation_mode":self.observation_mode, 'reward_mode':self.reward_mode,
+                                      "target_entity":self.target_entity}}
+        # combine render with environment
+        self.scenario_metadata = {environment, render}
 
     def step(self, action):
         self.info['step_number'] += 1
         self.info['action_history']["user_agent"][self.info['step_number']] = action
 
         # Get entity actions and determine player observation.
-        self.info['true_history'][self.info['step_number']], self.info['observation_history'][self.info['step_number']]\
-            = self.__get_entity_actions_and_observation()# look at first row of states
+        self.info['true_history'][self.info['step_number']], self.info['observation_history'][self.info['step_number']] \
+            = self.state_spaces[0], self.state_spaces[0]  # look at first row of states
         # roll state space into next step
         self.state_spaces = np.roll(self.state_spaces, 1, axis=0)
         # Calculate the player reward.
@@ -193,8 +206,6 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         self.info['episode_number'] = episode_number + 1
         # todo consider way to make dynamic if we have multiple agents in scene
         self.info['action_history'] = {"user_agent": -1 + np.zeros(self.max_steps + 1, dtype=int)}
-        for entity in self.entity_list:
-            self.info['action_history'][entity.entity_label] = -1 + np.zeros(self.max_steps + 1, dtype=int)
         self.info['true_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['observation_history'] = np.zeros((self.max_steps+1, self.num_channels), dtype=int)
         self.info['reward_history'] = np.zeros(self.max_steps+1, dtype=float)
@@ -229,27 +240,6 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         input('Press Enter to end the simulation...')
         return
 
-    def __validate_scenario_metadata(self):
-        # Validate scenario environment parameters.
-        assert self.scenario_metadata['environment']['num_channels'] > 0, "Environment parameter 'num_channels'\
-                                                                                                            is invalid."
-        assert self.scenario_metadata['environment']['max_steps'] > 0, "Environment parameter 'max_steps' is invalid."
-        assert self.scenario_metadata['environment']['observation_mode'] in self.metadata['observation_modes'], \
-            f'Invalid observation mode. Must be one of the following options: {self.metadata["observation_modes"]}'
-        assert self.scenario_metadata['environment']['reward_mode'] in self.metadata['reward_modes'],\
-            f'Invalid reward mode. Must be one of the following options: {self.metadata["reward_modes"]}'
-        if self.scenario_metadata['environment']['reward_mode'] == 'jam':
-            assert self.scenario_metadata['environment']['target_entity'] in\
-                   self.scenario_metadata['entities'].keys() or\
-                   self.scenario_metadata['environment']['target_entity'] == None, 'Invalid target entity name.\
-                    Must correspond to the name of one of the entity labels in the scenario file.'
-
-        # Validate scenario render parameters.
-        assert self.scenario_metadata['render']['render_mode'] is None or\
-               self.scenario_metadata['render']['render_mode'] in self.metadata['render_modes'],\
-            f'Invalid render mode. Must be one of the following options: {self.metadata["render_modes"]}'
-        assert self.scenario_metadata['render']['render_fps'] > 0, "Render parameter 'render_fps' is invalid."
-        assert self.scenario_metadata['render']['render_history'] > 0, "Render parameter 'render_history' is invalid."
     
     def __observation_space_encoder(self, observation_vect):
         observation_int = 0
@@ -289,7 +279,7 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         # combinotoric check
         assert num_states <= math.comb(channels, emitters), f'Error: For {channels} channels and {emitters}\
          emitters there are only {math.comb(channels, emitters)} unique states\
-          to choose from given deterministic transitions'
+          to choose from given deterministic transitions with no repeating states.'
         while len(states) < num_states:
             # IF non deterministic we don't have to check for duplicates -- should develop method for controlled Stochasticity
             idx = tuple(sorted(rng.choice(range(channels), size=emitters, replace=False)))
