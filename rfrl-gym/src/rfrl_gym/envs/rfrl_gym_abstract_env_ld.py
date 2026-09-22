@@ -143,7 +143,9 @@ class RFRLGymAbstractEnv_LD(gym.Env):
                                       "observation_mode":self.observation_mode, 'reward_mode':self.reward_mode,
                                       "target_entity":self.target_entity}}
         # combine render with environment
-        self.scenario_metadata = {environment, render}
+        self.scenario_metadata = {}
+        self.scenario_metadata['environment'] = environment['environment']
+        self.scenario_metadata['render'] = render['render']
 
     def step(self, action):
         self.info['step_number'] += 1
