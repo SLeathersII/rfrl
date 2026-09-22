@@ -1,0 +1,23 @@
+[project]
+name = "rfrl-gym"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "distinctipy>=1.3.4",
+    "gymnasium>=1.0.0",
+    "ipykernel>=7.3.0",
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.2",
+    "pyqt6==6.7.1",
+    "pyqtgraph>=0.14.0",
+    "rfrl-gym",
+    "scipy>=1.18.0",
+    "stable-baselines3[extra]==2.5.0a1",
+    "pywaspgen @ git+https://github.com/vtnsi/pywaspgen.git",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
