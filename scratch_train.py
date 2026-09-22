@@ -7,18 +7,18 @@ from rfrl_gym.modes.reward_mode import *
 
 
 # intilize environment through gym, specifying our scenario json
-env = gym.make('rfrl-gym-abstract-v0.1', render_mode='pyqt',
-               num_episodes=10)
-# env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
-#                pywasp_config = "pywaspgen/configs/default.json",
+# env = gym.make('rfrl-gym-abstract-v0.1', render_mode='pyqt',
 #                num_episodes=10)
+env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
+               pywasp_config = "pywaspgen/configs/default.json",
+               num_episodes=1)
 
 env.reset() # intialize info
 #env = EnergyDetector(env, 'detect') # apply sensor
-# env = OracleMap(env, 'detect')
+env = OracleMap(env, 'detect')
 #env = Jam(env)
-# env = DSA(env) # apply reward mode
-# env.reset()
+env = DSA(env) # apply reward mode
+env.reset()
 
 ocb = OnlineCallbackDqn(render=True)
 model = DQN("MlpPolicy", env,
