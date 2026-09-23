@@ -110,7 +110,7 @@ class RFRLGymAbstractEnv_LD(gym.Env):
         self.max_steps = max_steps
         self.observation_mode = 'detect'
         self.reward_mode = reward_mode
-        self.target_entity = "fixed_hop_freq" # TODO try and remove/avoid needing
+        self.target_entity = "fixed_hop_freq" # TODO try and remove/avoid needing at this level
 
         # Get the render parameters from the scenario file and initialize the render if necessary.
         self.render_mode = render_mode.lower()

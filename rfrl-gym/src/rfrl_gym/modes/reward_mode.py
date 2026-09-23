@@ -1,5 +1,4 @@
 import numpy as np
-from ..envs import RFRLGymIQEnv2
 from typing import TYPE_CHECKING, Any, Generic, SupportsFloat, TypeVar
 from gymnasium import Env, Wrapper
 
@@ -15,42 +14,27 @@ class RewardMode(Wrapper[ObsType, ActType, ObsType, ActType]):
     reinforcement learning reward shaping and objective formulation.
 
     This wrapper modifies the scalar reward signal returned by the underlying 
-    RF environment's :meth:`step` function. It supports the integration of an 
-    oracle mode to evaluate the agent's chosen action against complete system 
-    ground truth (upper bound of learning dynamics) rather than partial or noisy observation-space 
-    sensor metrics.
+    RF environment's :meth:`step` function.
 
     Parameters
     ----------
     env : Env[ObsType, ActType]
-        The Gymnasium environment instance to be wrapped.
-    oracle : bool, default=False
-        If ``True``, enables oracle-assisted reward computation using 
-        ground-truth state information rather than estimated or sensed metrics.
-
-    Attributes
-    ----------
-    oracle : bool
-        Flag indicating whether ground-truth oracle feedback is active for 
-        objective evaluation.
+        The Gymnasium environment instance to be wrapped -- IQ generator.
 
     Notes
     -----
     Subclasses must override the :meth:`reward` method to implement specific 
-    RF optimization objectives (e.g., spectral efficiency maximization, 
-    SINR threshold penalty, or packet error rate minimization).
+    RF optimization objectives (e.g., spectral efficiency maximization--DSA).
     """
 
-    # todo specify rfrl_gym to lint the base variables
-    def __init__(self, env: Env[ObsType, ActType], oracle: bool = False):
+
+    def __init__(self, env: Env[ObsType, ActType]):
         """Initialize the RewardMode wrapper.
 
         Parameters
         ----------
         env : Env[ObsType, ActType]
             The environment to wrap.
-        oracle : bool, default=False
-            Whether to base the reward function on ground truth parameters.
         """
         Wrapper.__init__(self, env)
 
@@ -70,9 +54,9 @@ class RewardMode(Wrapper[ObsType, ActType, ObsType, ActType]):
         observation : ObsType
             The next observation from the environment space.
         reward : SupportsFloat
-            The shaped or oracle-modified reward value based on the optimization objective.
+            The shaped reward value based on the optimization objective.
         terminated : bool
-            Whether the Markov Decision Process (MDP) terminal state is reached.
+            Whether the simulation terminal state is reached.
         truncated : bool
             Whether the episode truncation condition (e.g., time horizon limit) is met.
         info : dict[str, Any]
@@ -221,7 +205,8 @@ class Jam(RewardMode):
             reward = 0
         else:
             # Extract the current channel index occupied by the targeted communications entity
-            target_idx = self.env.unwrapped.info['action_history'][self.env.unwrapped.target_entity][self.env.unwrapped.info['step_number']]
+            target_idx = self.env.unwrapped.info['action_history'][self.env.unwrapped.target_entity]\
+                [self.env.unwrapped.info['step_number']]
             # Map structural alignment to binary payoff space: True (1) -> +1.0, False (0) -> -1.0 and 
             reward = int(2.0 * (target_idx == action) -1.0)
         
