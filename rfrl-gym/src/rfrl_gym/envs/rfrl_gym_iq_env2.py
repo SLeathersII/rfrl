@@ -136,7 +136,7 @@ class RFRLGymIQEnv2(gym.Env):
         # Get the entity parameters from the scenario file and initialize the entities.
         self.entity_generator = rfrl_gym.entities.EntityGenerator(self.scenario_metadata)
 
-        self.entity_list = self.entity_generator.get_entity_list()
+        self.entity_list = self.entity_generator.get_entity_list()  # self.entity_generator.entity_list
         self.num_entities = len(self.entity_list)
         # Method below is consistent with __get_entity_actions_and_observation which creates action_history
         entity_idx = 0

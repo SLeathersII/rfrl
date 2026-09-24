@@ -11,7 +11,7 @@ uv sync
 uv run rfrl-gym/scripts/sb3_example.py
 ```
 This will make one of the original monolithic abstract gyms ('rfrl-gym-abstract-v0') in jam mode over 10 channels. It will first train for 200
-epochs then will run inference and render in pyqt showing an agent which has learned the spectral pattern.
+epochs then will run inference and render in pyqt showing an agent which has learned a targeted jamming policy.
 
 ```python
 import gymnasium as gym
@@ -62,7 +62,7 @@ For modern functionality run
 uv run scratch_train.py
 ```
 which will use the RFRL gym updates on the same scenario to convert the reward function to DSA with a wrapper and 
-CA_CFAR sensing. IQ will be generated slower due to PyWaspGen single thread bug [Need to avoid forkbomb issue]. 
+CA_CFAR sensing. Gym will run slower due to PyWaspGen single thread bug AND CFAR sensing computation. 
 
 ```python
 import gymnasium as gym
