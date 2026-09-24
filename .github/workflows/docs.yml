@@ -32,9 +32,11 @@ jobs:
         with:
           python-version: 3.x
 
-      - run: pip install zensical
+      - name: Install dependencies
+        run: |
+          pip install zensical
+          pip install mkdocstrings mkdocstrings-python
 
-      # Explicitly forces zensical to find the local file if it's there
       - run: zensical build --clean -f zensical.toml
 
       - uses: actions/upload-pages-artifact@v5
@@ -43,3 +45,4 @@ jobs:
 
       - uses: actions/deploy-pages@v5
         id: deployment
+
