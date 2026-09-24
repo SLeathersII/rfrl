@@ -13,6 +13,7 @@ site_name = "RFRL-Gym Documentation"
 nav = [
   { "Get started" = "index.md" },
   { "API Reference" = [
+      { "RFRL-Gym" = "api_intro.md"},
       { "Environments" = "api_envs.md" },
       { "Entities" = "api_entities.md" },
       { "Detectors" = "api_detectors.md" },
