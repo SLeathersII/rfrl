@@ -23,12 +23,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
-      - name: Install dependencies
-          run: |
-            pip install zensical
-            pip install mkdocstrings mkdocstrings-python
-
-          - run: zensical build --clean -f zensical.toml
+      - run: pip install zensical
+      - run: zensical build --clean -f zensical.toml
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
