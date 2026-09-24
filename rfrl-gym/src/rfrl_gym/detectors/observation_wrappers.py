@@ -183,6 +183,7 @@ class EnergyDetector(Sensor):
     channel, and applying a threshold to determine channel occupancy.
 
     The signal processing chain for each channel consists of:
+
     1. Frequency shifting to baseband the channel of interest.
     2. Low-pass filtering to isolate the channel bandwidth.
     3. Downsampling to the channel's Nyquist rate.
@@ -229,7 +230,6 @@ class EnergyDetector(Sensor):
             self.observation_base = 2
         elif space == 'classify':
             self.observation_base = 1 + env.unwrapped.num_entities
-
         self.threshold = threshold
         if sos_filter is None:
             sos_filter = signal.butter(30, 1/self.env.unwrapped.num_channels, output='sos')

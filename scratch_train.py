@@ -1,31 +1,42 @@
 import gymnasium as gym
 import rfrl_gym
+import argparse
 from stable_baselines3 import DQN
 from train_utils import OnlineCallbackDqn
 from rfrl_gym.detectors.observation_wrappers import *
 from rfrl_gym.modes.reward_mode import *
 
 
-# intilize environment through gym, specifying our scenario json
-# env = gym.make('rfrl-gym-abstract-v0.1', render_mode='pyqt',
-#                num_episodes=10)
-env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
-               pywasp_config = "pywaspgen/configs/default.json",
+parser = argparse.ArgumentParser()
+parser.add_argument('-s', '--scenario', default='sb3_test_scenario.json',
+                    type=str, help='The scenario file to preview in the RFRL gym environment.')
+parser.add_argument('-c', '--pywaspgen_config', default="pywaspgen/configs/default.json",
+                    type=str, help='The scenario file to preview in the RFRL gym environment.')
+parser.add_argument('-m', '--gym_mode', default='rfrl-gym-iq-v0.1',
+                    type=str, help='Which type of RFRL gym environment to run.')
+parser.add_argument('-e', '--epochs', default=5,
+                    type=int, help='Number of training epochs.')
+args = parser.parse_args()
+
+env = gym.make(args.gym_mode, scenario_filename=args.scenario,
+               pywasp_config =args.pywaspgen_config,
                num_episodes=1)
-
-env.reset() # intialize info
-#env = EnergyDetector(env, 'detect') # apply sensor
-env = OracleMap(env, 'detect')
-#env = Jam(env)
-env = DSA(env) # apply reward mode
+# Apply sensor
+env = CA_CFAR(env, 'detect', p_fa=0.01)
+                #env = EnergyDetector(env, 'detect')
+                #env = OracleMap(env, 'detect')
+                #env = Jam(env)
+# Apply reward wrapper
+env = DSA(env)
 env.reset()
-
-ocb = OnlineCallbackDqn(render=True)
+# Online Call Back for online learning and rendering
+#ocb = OnlineCallbackDqn(render=True)
+ocb = None
 model = DQN("MlpPolicy", env,
             verbose=1, exploration_initial_eps=1.0,
             exploration_final_eps=0.001,exploration_fraction=0.9)
 
-model = model.learn(total_timesteps=env.unwrapped.max_steps*7, # epochs
+model = model.learn(total_timesteps=env.unwrapped.max_steps*args.epochs, # epochs
                     callback=ocb,
                     log_interval=100,
                     progress_bar=True)
