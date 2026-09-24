@@ -37,7 +37,7 @@ jobs:
           pip install zensical
           pip install mkdocstrings mkdocstrings-python griffe-generics
 
-      - run: zensical build --clean -f zensical.toml --lax
+      - run: zensical build --clean -f zensical.toml
 
       - uses: actions/upload-pages-artifact@v5
         with:
