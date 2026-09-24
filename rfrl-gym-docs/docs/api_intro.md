@@ -1,10 +1,10 @@
 # RFRL-Gym
 
-RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning.
+RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning. Work derived from
+([VTNSI rfrl-gym](https://github.com/vtnsi/rfrl-gym/tree/master))
 
-RFRL-Gym decomposes an RF reinforcement-learning problem into four
-independently swappable components, each implemented as a layer that wraps
-the one below it:
+This RFRL-Gym decomposes the RF reinforcement-learning problem into four
+independently swappable components:
 
 1. :mod:`rfrl_gym.envs` -- the **environment / scene handler**. Owns the RF
    simulation itself: IQ data generation, channel state, entity behavior,
@@ -21,7 +21,8 @@ the one below it:
    that consumes the detector's observations and the reward mode's reward
    to select actions.
 
-Each wrapper layer should be modular and interchanged functionally. A typical RFRL-Gym environment is
+Each wrapper layer should allow independent functional composition with dependencies only derived from the outputs from
+the layer above. The RFRL-Gym environment is
 assembled by stacking wrappers around a base environment:
 
 ```python
@@ -32,13 +33,38 @@ env = OracleMap(env, 'detect')    # 2. sensing layer, shapes the observation
 env = DSA(env)              # 3. reward mode, shapes the reward
 # 4. policy/agent trains against `env` as a standard Gymnasium environment
 ```
-Noting that wrappers are applied in the order they are wrapped and should be applied in the above order. A single IQ 
-generation can then be functionally applied to process the scene (vectorized environment) with many different detectors 
-or reward shaping compositions in parallel. 
+
+```mermaid
+graph TD
+    A["Environment<br/><i>rfrl_gym.envs</i><br/>IQ generation · scenario bookkeeping"]
+    B["Detector<br/><i>rfrl_gym.detectors</i><br/>raw IQ → agent observation"]
+    C["Reward Mode<br/><i>rfrl_gym.modes</i><br/>State space → agent reward"]
+    D["Policy / Agent<br/><i>external</i><br/>observation + reward → action"]
+
+    A -->|Raw State Data| B
+    B -->|Sensed State Space Data| C
+    C -->|Sense State and Reward| D
+    D -->|Policy action| A
+    A -. "ground truth may bypasses detector for reward" .-> C
+
+    style A fill:#15803d,stroke:#166534,color:#fff 
+    style B fill:#1a56db,stroke:#1e429f,color:#fff 
+    style C fill:#ca8a04,stroke:#854d0e,color:#fff
+    style D fill:#c2410c,stroke:#9a3412,color:#fff 
+```
+
+| Layer | Package | Owns                                         | Wraps                    |
+|---|---|----------------------------------------------|--------------------------|
+| **1. Environment** | [`rfrl_gym.envs`](api_envs.md) | RF simulation, IQ generation, channel state, scenario config | — (base)                 |
+| **2. Detector** | [`rfrl_gym.detectors`](api_detectors.md) | Sensing: raw IQ → observation                | Environment              |
+| **3. Reward Mode** | [`rfrl_gym.modes`](api_modes.md) | reward function defining the operational mode| Environment (+ Detector) |
+| **4. Policy / Agent** | *external* | Action selection                             | Gym                      |
 
 
-See Also
+
+
+Tutorials
 --------
-rfrl_gym.envs : Scene handlers / IQ generators.
-rfrl_gym.detectors : Sensing wrappers that shape observations.
-rfrl_gym.modes : Reward wrappers that shape the training signal.
+* [`Getting Started`](api_getting_started.md)  : running stable-baseline3 test script.
+* [`Scenario Files and Scene Generation`](scenario_configs.md)  : Detail scenario file hyper parameters 
+and composition for experiment design. 

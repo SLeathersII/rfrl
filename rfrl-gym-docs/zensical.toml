@@ -11,9 +11,8 @@ site_name = "RFRL-Gym Documentation"
 # edit_uri = "edit/main/docs/"
 
 nav = [
-  { "Get started" = "index.md" },
+  { "RFRL-Gym" = "api_intro.md"},
   { "API Reference" = [
-      { "RFRL-Gym" = "api_intro.md"},
       { "Environments" = "api_envs.md" },
       { "Entities" = "api_entities.md" },
       { "Detectors" = "api_detectors.md" },
@@ -21,7 +20,12 @@ nav = [
       { "Renderer" = "api_renderers.md"}
 
   ]},
+    { "Tutorials" = [
+        {"Getting Started" = "api_getting_started.md"},
+        {"Scenario Files, Configs, and Entities" = "scenario_configs.md"}
+    ]},
   { "Markdown in 5min" = "markdown.md" },
+  { "Get started" = "index.md" },
 ]
 
 # extra_css = ["stylesheets/extra.css"]

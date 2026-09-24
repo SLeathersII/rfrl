@@ -389,6 +389,8 @@ class CA_CFAR(Sensor):
     adjusting the detection threshold based on the local noise floor estimate.
 
     The processing pipeline is as follows:
+
+
     1.  **Channelization**: The input wideband signal is demultiplexed into
         individual, narrower channels.
     2.  **PSD Estimation**: For each channel, the Power Spectral Density (PSD)
@@ -403,6 +405,25 @@ class CA_CFAR(Sensor):
     6.  **Occupancy Decision**: A channel is declared occupied if the number of
         bin-level detections exceeds a final decision threshold.
 
+    The CA-CFAR window convolves across the PSD one bin at a time. At each
+    position it is centered on a Cell Under Test (CUT), flanked by guard
+    cells (excluded from the estimate) and, outside those, averaging/training
+    cells (used to estimate the local noise floor)::
+
+        bins:    [ ][ ][ ]|A|A|A|A|G|G|G|C|G|G|G|A|A|A|A|[ ][ ][ ]
+                            <----------- window ----------->
+                            <-- avg --><-guard-> <-guard--><-- avg -->
+                                              ^
+                                             CUT
+
+        A = averaging (training) cell   G = guard cell   C = cell under test
+
+    As the window slides to the next bin, most of its averaging and guard
+    cells are reused from the previous position -- only one cell enters and
+    one leaves on each side. This is exactly the overlap a 1D convolution
+    exploits: the per-bin noise estimate is a moving average, so a kernel of
+    ones (with guard-cell zeros in the middle) can be convolved across the
+    whole PSD in one pass rather than recomputed from scratch at every bin.
     Parameters
     ----------
     env : Env
@@ -440,6 +461,8 @@ class CA_CFAR(Sensor):
         The number of guard cells per side.
     num_average_cells : int
         The number of averaging cells per side.
+
+
 
     """
 

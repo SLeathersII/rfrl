@@ -1,6 +1,10 @@
-# detector API
+# Detector API
 
-::: rfrl_gym.detectors
+::: rfrl_gym.detectors.observation_wrappers
     options:
-        members: true
+        members:
+          - Sensor
+          - EnergyDetector
+          - OracleMap
+          - CA_CFAR
         show_labels: true
