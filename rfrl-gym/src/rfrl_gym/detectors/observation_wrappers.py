@@ -402,8 +402,7 @@ class CA_CFAR(Sensor):
         the noise estimate with a factor `alpha`, derived from the desired `p_fa`.
     5.  **Detection**: A detection is declared in a frequency bin if its power
         exceeds the adaptive threshold.
-    6.  **Occupancy Decision**: A channel is declared occupied if the number of
-        bin-level detections exceeds a final decision threshold.
+
 
     The CA-CFAR window convolves across the PSD one bin at a time. At each
     position it is centered on a Cell Under Test (CUT), flanked by guard
@@ -411,10 +410,10 @@ class CA_CFAR(Sensor):
     cells (used to estimate the local noise floor)::
 
         bins:    [ ][ ][ ]|A|A|A|A|G|G|G|C|G|G|G|A|A|A|A|[ ][ ][ ]
-                            <----------- window ----------->
-                            <-- avg --><-guard-> <-guard--><-- avg -->
-                                              ^
-                                             CUT
+                            <----------- window ------->
+                            <--avg-><-grd><grd><--avg-->
+                                          ^
+                                         CUT
 
         A = averaging (training) cell   G = guard cell   C = cell under test
 
