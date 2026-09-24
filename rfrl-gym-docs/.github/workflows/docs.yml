@@ -4,6 +4,9 @@ on:
     branches:
       - master
       - main
+    # 1. Only trigger if files inside your documentation folder change
+    paths:
+      - 'rfrl-gym-docs/**'
 permissions:
   contents: read
   pages: write
