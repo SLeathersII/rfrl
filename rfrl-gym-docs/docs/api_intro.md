@@ -23,9 +23,21 @@ modular components:
    [![Class](https://img.shields.io/badge/Class-Jam-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md)).
 
 4. **Policy / agent** — the learning algorithm, external to this package,
-   that consumes the detector's observations and the reward mode's reward
-   to select actions.
+   that adheres to the standard [Gymnasium](https://gymnasium.farama.org/)
+   interface. Because the entire wrapper stack (environment → detector →
+   reward mode) ultimately still exposes a standard `gym.Env`, the
+   policy/agent side only ever needs to know about `reset()` and `step()`.:
 
+   - `reset()` → returns the initial `(observation, info)`.
+   - `step(action)` → returns `(observation, reward, terminated, truncated, info)`
+In practice this means you can drop the composed environment
+   straight into:
+
+   - [**Stable-Baselines3**](https://stable-baselines3.readthedocs.io/) — PyTorch implementations of common algorithms (PPO, SAC, DQN, etc.), the library used in the `Getting Started` tutorial's test script.
+   - [**RLlib**](https://docs.ray.io/en/latest/rllib/) (Ray) — scalable, distributed training across many algorithms and multi-agent setups.
+   - [**CleanRL**](https://docs.cleanrl.dev/) — single-file, research-oriented reference implementations, useful if you want to read or modify the training loop directly rather than treat it as a black box.
+   - Or a fully custom training loop written directly against `reset()`/`step()`.
+     
 Each wrapper layer allows independent functional composition, with dependencies
 derived only from the layer above it. The RFRL-Gym environment is assembled by
 stacking wrappers around a base environment:
