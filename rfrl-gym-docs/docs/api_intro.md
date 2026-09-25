@@ -34,7 +34,7 @@ env = DSA(env)              # 3. reward mode, shapes the reward
 
 ```mermaid
 graph TD
-    A["Environment<br/><i>rfrl_gym.envs</i><br/>IQ generation · scenario bookkeeping"]
+    A["Environment<br/><i>rfrl_gym.envs</i><br/>IQ generation · simulation logic"]
     B["Detector<br/><i>rfrl_gym.detectors</i><br/>raw IQ → agent observation"]
     C["Reward Mode<br/><i>rfrl_gym.modes</i><br/>State space → agent reward"]
     D["Policy / Agent<br/><i>external</i><br/>observation + reward → action"]
