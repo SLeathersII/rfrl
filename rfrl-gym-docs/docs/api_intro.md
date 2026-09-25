@@ -1,48 +1,41 @@
 # RFRL-Gym
 
 RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning. Work derived from
-([VTNSI rfrl-gym](https://github.com/vtnsi/rfrl-gym/tree/master))
+([VTNSI rfrl-gym](https://github.com/vtnsi/rfrl-gym/tree/master)).
 
-This RFRL-Gym decomposes the RF reinforcement-learning problem into four
-independently module components:
+RFRL-Gym decomposes the RF reinforcement-learning problem into four independently
+modular components:
 
-[![paper](https://img.shields.io/badge/Paper-OpenReview%20(v1.0)-b31b1b?style=for-the-badge)](https://openreview.net/pdf?id=gT6j4_tskUt)
-&nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/PAPER-arXiv%20(v1.5)-yellowgreen?style=for-the-badge)](https://arxiv.org/abs/2306.09301)
-&nbsp;&nbsp;&nbsp;
+1. [![Module](https://img.shields.io/badge/Module-rfrl__gym.envs-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md)
+   — the **environment / scene handler**. Owns the RF simulation itself: IQ data
+   generation, channel state, entity behavior, and scenario bookkeeping
+   (e.g. [![Class](https://img.shields.io/badge/Class-RFRLGymIQEnv2-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md)).
 
+2. [![Module](https://img.shields.io/badge/Module-rfrl__gym.detectors-yellow?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_detectors.md)
+   — the **sensing layer**. A wrapper that turns the environment's raw IQ
+   output into the observation an agent actually sees (e.g. detection or
+   classification results). Defines observation space and encoding.
 
+3. [![Module](https://img.shields.io/badge/Module-rfrl__gym.modes-yellow?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md)
+   — the **objective layer**. A wrapper that defines the environment's reward
+   logic and outputs reward signal
+   (e.g. [![Class](https://img.shields.io/badge/Class-DSA-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md),
+   [![Class](https://img.shields.io/badge/Class-Jam-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md)).
 
-[![paper](https://img.shields.io/badge/leaderboard-35%2B%20Methods-228c22?style=for-the-badge)](https://zjysteven.github.io/OpenOOD/)
-&nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/colab-tutorial-orange?style=for-the-badge)](https://colab.research.google.com/drive/1tvTpCM1_ju82Yygu40fy7Lc0L1YrlkQF?usp=sharing)
-&nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/Forum-SLACK-797ef6?style=for-the-badge)](https://openood.slack.com/)
-
-
-1. :mod:`rfrl_gym.envs` -- the **environment / scene handler**. Owns the RF
-   simulation itself: IQ data generation, channel state, entity behavior,
-   and scenario bookkeeping (e.g. :class:`~rfrl_gym.envs.RFRLGymIQEnv2`).
-2. :mod:`rfrl_gym.detectors` -- the **sensing layer**. A wrapper that turns
-   the environment's raw IQ output into the observation an agent actually
-   sees (e.g. detection or classification results). Defines observation space and encoding.
-3. :mod:`rfrl_gym.modes` -- the **objective layer**. A wrapper that
-   defines the environment's reward logic and outputs reward signal.
-   (e.g. :class:`~rfrl_gym.modes.DSA`, :class:`~rfrl_gym.modes.Jam`).
-4. **Policy / agent** -- the learning algorithm, external to this package,
+4. **Policy / agent** — the learning algorithm, external to this package,
    that consumes the detector's observations and the reward mode's reward
    to select actions.
 
-Each wrapper layer should allow independent functional composition with dependencies only derived from the outputs from
-the layer above. The RFRL-Gym environment is
-assembled by stacking wrappers around a base environment:
+Each wrapper layer allows independent functional composition, with dependencies
+derived only from the layer above it. The RFRL-Gym environment is assembled by
+stacking wrappers around a base environment:
 
 ```python
 env = gym.make('rfrl-gym-iq-v0.1', scenario_filename='sb3_test_scenario.json',
-               pywasp_config = "pywaspgen/configs/default.json",
-               num_episodes=1)     # 1. scene handler / IQ generator
-env = OracleMap(env, 'detect')    # 2. sensing layer, shapes the observation
-env = DSA(env)              # 3. reward mode, shapes the reward
+               pywasp_config="pywaspgen/configs/default.json",
+               num_episodes=1)   # 1. scene handler / IQ generator
+env = OracleMap(env, 'detect')   # 2. sensing layer, shapes the observation
+env = DSA(env)                   # 3. reward mode, shapes the reward
 # 4. policy/agent trains against `env` as a standard Gymnasium environment
 ```
 
@@ -57,26 +50,22 @@ graph TD
     B -->|Sensed State Space Data| C
     C -->|Sense State and Reward| D
     D -->|Policy action| A
-    A -. "ground truth may bypasses detector for reward" .-> C
+    A -. "ground truth may bypass detector for reward" .-> C
 
-    style A fill:#15803d,stroke:#166534,color:#fff 
-    style B fill:#1a56db,stroke:#1e429f,color:#fff 
+    style A fill:#15803d,stroke:#166534,color:#fff
+    style B fill:#ca8a04,stroke:#854d0e,color:#fff
     style C fill:#ca8a04,stroke:#854d0e,color:#fff
-    style D fill:#c2410c,stroke:#9a3412,color:#fff 
+    style D fill:#c2410c,stroke:#9a3412,color:#fff
 ```
 
-| Layer | Package | Owns                                         | Wraps                    |
-|---|---|----------------------------------------------|--------------------------|
-| **1. Environment** | [`rfrl_gym.envs`](api_envs.md) | RF simulation, IQ generation, channel state, scenario config | — (base)                 |
-| **2. Detector** | [`rfrl_gym.detectors`](api_detectors.md) | Sensing: raw IQ → observation                | Environment              |
-| **3. Reward Mode** | [`rfrl_gym.modes`](api_modes.md) | reward function defining the operational mode| Environment (+ Detector) |
-| **4. Policy / Agent** | *external* | Action selection                             | Gym                      |
+| Layer                  | Package                                                                                                      | Owns                                                          | Wraps                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------| -------------------------------------------------------------- | ------------------------ |
+| **1. Environment**      | [`rfrl_gym.envs`](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md)               | RF simulation, IQ generation, channel state, scenario config  | — (base)                 |
+| **2. Detector**         | [`rfrl_gym.detectors`](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_detectors.md)     | Sensing: raw IQ → observation                                  | Environment              |
+| **3. Reward Mode**      | [`rfrl_gym.modes`](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md)             | Reward function defining the operational mode                 | Environment (+ Detector) |
+| **4. Policy / Agent**   | *external*                                                                                                    | Action selection                                                | Gym                      |
 
+## Tutorials
 
-
-
-Tutorials
---------
-* [`Getting Started`](api_getting_started.md)  : running stable-baseline3 test script.
-* [`Scenario Files and Scene Generation`](scenario_configs.md)  : Detail scenario file hyper parameters 
-and composition for experiment design. 
+- [`Getting Started`](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_getting_started.md) — running the stable-baselines3 test script.
+- [`Scenario Files and Scene Generation`](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/scenario_configs.md) — scenario file hyperparameters and composition for experiment design.
