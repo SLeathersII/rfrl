@@ -50,7 +50,7 @@ graph TD
     B -->|Sensed State Space Data| C
     C -->|Sense State and Reward| D
     D -->|Policy action| A
-    A -. "ground truth may bypass detector for reward" .-> C
+    A -. "ground truth may bypass" .-> C
 
     style A fill:#15803d,stroke:#166534,color:#fff
     style B fill:#ca8a04,stroke:#854d0e,color:#fff
