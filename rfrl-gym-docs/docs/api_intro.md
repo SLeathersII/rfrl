@@ -4,19 +4,17 @@ RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning. Wor
 ([VTNSI rfrl-gym](https://github.com/vtnsi/rfrl-gym/tree/master))
 
 This RFRL-Gym decomposes the RF reinforcement-learning problem into four
-independently swappable components:
+independently module components:
 
 1. :mod:`rfrl_gym.envs` -- the **environment / scene handler**. Owns the RF
    simulation itself: IQ data generation, channel state, entity behavior,
    and scenario bookkeeping (e.g. :class:`~rfrl_gym.envs.RFRLGymIQEnv2`).
 2. :mod:`rfrl_gym.detectors` -- the **sensing layer**. A wrapper that turns
    the environment's raw IQ output into the observation an agent actually
-   sees (e.g. detection or classification results).
+   sees (e.g. detection or classification results). Defines observation space and encoding.
 3. :mod:`rfrl_gym.modes` -- the **objective layer**. A wrapper that
-   replaces the environment's scalar reward with a task-specific objective
-   (e.g. :class:`~rfrl_gym.modes.DSA`, :class:`~rfrl_gym.modes.Jam`),
-   computed from environment ground truth rather than from what the
-   detector exposes.
+   defines the environment's reward logic and outputs reward signal.
+   (e.g. :class:`~rfrl_gym.modes.DSA`, :class:`~rfrl_gym.modes.Jam`).
 4. **Policy / agent** -- the learning algorithm, external to this package,
    that consumes the detector's observations and the reward mode's reward
    to select actions.
