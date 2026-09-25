@@ -3,10 +3,7 @@
 [![Module](https://img.shields.io/badge/Module-rfrl__gym.modes-yellow?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md)
 
 Reward-shaping wrappers — the **objective layer** of RFRL-Gym's four-part
-modular stack. A mode wraps an already-composed environment (optionally
-with a detector already applied) and replaces only the reward: action,
-observation, termination, and info all continue to flow through
-`step()` untouched.
+modular stack. A mode wraps an already-composed environment to define the reward signal.
 
 ## `RewardMode` — base skeleton
 
@@ -48,7 +45,7 @@ modes. Both follow the same shape:
 
 [![Class](https://img.shields.io/badge/Class-DSA-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md#dsa)
 
-Rewards **avoiding collisions** — models opportunistic, non-cooperative
+Rewards **avoiding collisions** — models opportunistic dynamic
 spectrum access:
 
 | Action | Condition | Reward |
