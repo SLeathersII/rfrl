@@ -46,7 +46,18 @@ modes. Both follow the same shape:
 [![Class](https://img.shields.io/badge/Class-DSA-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md#dsa)
 
 Rewards **avoiding collisions** — models opportunistic dynamic
-spectrum access:
+spectrum access.  In
+this paradigm, the Cognitive Radio (CR) senses channel occupancy and learns
+state transitions to identify vacant spectral gaps. The objective
+is strictly defined: maximize overall spectrum utilization while
+entirely avoiding spectral collisions with incumbent users or
+adversarial emitters.
+---
+Dynamic Spectrum Access is fundamentally a sequential
+decision-making problem uniquely suited to RL. Real-world
+RF networks exhibit massive, non-stationary state spaces
+driven by evolving user patterns and frequency hopping spread
+spectrum protocols, such as Bluetooth or SINCGARS:
 
 | Action | Condition | Reward |
 | ------ | --------- | ------ |
