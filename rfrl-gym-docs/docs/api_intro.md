@@ -46,14 +46,14 @@ graph TD
     C["Reward Mode<br/><i>rfrl_gym.modes</i><br/>State space → agent reward"]
     D["Policy / Agent<br/><i>external</i><br/>observation + reward → action"]
 
-    A -->|Raw State Data| B
-    B -->|Sensed State Space Data| C
-    C -->|Sense State and Reward| D
+    A -.->|Raw State Data| B
+    B -.->|Sensed State Space Data| C
+    C -->|State ($\mathcal{S}$) for agent\nReward| D
     D -->|Policy action| A
-    A -. "ground truth may bypass" .-> C
+    A -. "ground truth" .-> C
 
-    style A fill:#15803d,stroke:#166534,color:#fff
-    style B fill:#ca8a04,stroke:#854d0e,color:#fff
+    style A fill:#15803d,stroke:#166534,color:#fff,stroke-width:3px
+    style B fill:#ca8a04,stroke:#854d0e,color:#fff,fill-opacity:0.45,stroke-dasharray: 4 3
     style C fill:#ca8a04,stroke:#854d0e,color:#fff
     style D fill:#c2410c,stroke:#9a3412,color:#fff
 ```
