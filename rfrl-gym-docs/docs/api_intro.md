@@ -6,6 +6,20 @@ RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning. Wor
 This RFRL-Gym decomposes the RF reinforcement-learning problem into four
 independently module components:
 
+[![paper](https://img.shields.io/badge/Paper-OpenReview%20(v1.0)-b31b1b?style=for-the-badge)](https://openreview.net/pdf?id=gT6j4_tskUt)
+&nbsp;&nbsp;&nbsp;
+[![paper](https://img.shields.io/badge/PAPER-arXiv%20(v1.5)-yellowgreen?style=for-the-badge)](https://arxiv.org/abs/2306.09301)
+&nbsp;&nbsp;&nbsp;
+
+
+
+[![paper](https://img.shields.io/badge/leaderboard-35%2B%20Methods-228c22?style=for-the-badge)](https://zjysteven.github.io/OpenOOD/)
+&nbsp;&nbsp;&nbsp;
+[![paper](https://img.shields.io/badge/colab-tutorial-orange?style=for-the-badge)](https://colab.research.google.com/drive/1tvTpCM1_ju82Yygu40fy7Lc0L1YrlkQF?usp=sharing)
+&nbsp;&nbsp;&nbsp;
+[![paper](https://img.shields.io/badge/Forum-SLACK-797ef6?style=for-the-badge)](https://openood.slack.com/)
+
+
 1. :mod:`rfrl_gym.envs` -- the **environment / scene handler**. Owns the RF
    simulation itself: IQ data generation, channel state, entity behavior,
    and scenario bookkeeping (e.g. :class:`~rfrl_gym.envs.RFRLGymIQEnv2`).
