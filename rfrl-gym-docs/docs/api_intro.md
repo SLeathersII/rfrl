@@ -47,8 +47,8 @@ graph TD
     D["Policy / Agent<br/><i>external</i><br/>observation + reward → action"]
 
     A -.->|Raw State Data| B
-    B -.->|Sensed State Space Data| C
-    C -->|State 𝒮 and Reward for agent| D
+    B -.->|Sensed State 𝒮| C
+    C -->|State 𝒮 and Reward| D
     D -->|Policy action| A
     A -.->|ground truth| C
 
