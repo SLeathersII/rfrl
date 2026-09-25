@@ -48,7 +48,7 @@ graph TD
 
     A -.->|Raw State Data| B
     B -.->|Sensed State Space Data| C
-    C -->|State 𝒮 for agent\nReward| D
+    C -->|State 𝒮 and Reward for agent| D
     D -->|Policy action| A
     A -.->|ground truth| C
 
