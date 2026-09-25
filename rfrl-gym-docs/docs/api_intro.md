@@ -1,6 +1,6 @@
 # RFRL-Gym
 
-RFRL-Gym: a modular Gymnasium-based framework for RF reinforcement learning. Work derived from
+RFRL-Gym: a modular [Gymnasium](https://gymnasium.farama.org/)-based framework for RF reinforcement learning. Work derived from
 ([VTNSI rfrl-gym](https://github.com/vtnsi/rfrl-gym/tree/master)).
 
 RFRL-Gym decomposes the RF reinforcement-learning problem into four independently
