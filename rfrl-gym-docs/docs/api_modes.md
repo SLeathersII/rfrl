@@ -70,8 +70,8 @@ spectrum protocols, such as Bluetooth or SINCGARS:
 
 [![Class](https://img.shields.io/badge/Class-Jam-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_modes.md#jam)
 
-Rewards **frequency alignment** — models an electronic-attack objective
-against a specific target:
+Rewards **channel alignment** — models an electronic-attack objective
+against a specific target. Reward is based on RL agent emitting in the same channel as the target entity:
 
 | Action | Condition | Reward |
 | ------ | --------- | ------ |
