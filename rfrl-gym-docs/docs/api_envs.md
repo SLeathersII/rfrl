@@ -63,38 +63,7 @@ computed directly against `true_history`:
 
 This is the environment used by [`sb3_example.py`](./api_getting_started.md#example-1--sb3_examplepy-abstract-gym-legacy-path) — `gym.make('rfrl-gym-abstract-v0', ...)`.
 
-## `RFRLGymAbstractEnv_LD`
 
-[![Class](https://img.shields.io/badge/Class-RFRLGymAbstractEnv__LD-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
-[![Paradigm](https://img.shields.io/badge/Paradigm-Monolithic-lightgrey?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
-[![Research](https://img.shields.io/badge/Research-Learning%20Dynamics-orange?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
-
-A stripped-down variant built for studying **learning dynamics** rather
-than realistic scenarios — its own docstring describes it as an "upper
-bound" baseline. Instead of loading a scenario file and simulating
-entities, it pre-generates a fixed pool of `num_states` unique
-channel-occupancy patterns (`gen_states`, combinatorially sampled with a
-seed) and cycles through them by rolling the state array each step —
-there's no entity behavior at all, just a perfectly-sensed, repeating
-grid-world label map.
-
-| Parameter | Type | Default | Description |
-| --------- | ---- | ------- | ----------- |
-| `num_channels` | `int` | `10` | Channel count. |
-| `num_emitters` | `int` | `7` | How many channels are "occupied" in each generated state. |
-| `num_states` | `int` | `10` | Size of the pre-generated state pool (bounded by `C(num_channels, num_emitters)`). |
-| `max_steps` | `int` | `500` | Episode length. |
-| `render_mode` | `str` | `'null'` | Same options as other environments. |
-| `reward_mode` | `str` | `'dsa'` | `'dsa'` or `'jam'`. |
-| `seed` | `int` | `3` | Seed for state-pool generation. |
-
-> **Caveat:** this class's own comments flag unresolved rough edges — the
-> `target_entity` is hardcoded to `"fixed_hop_freq"` with a `# TODO try
-> and remove/avoid needing at this level` note, and `'jam'` reward mode
-> references `self.target_idx`, which is never actually assigned in this
-> class (only `'dsa'` mode is confirmed functional here). Treat this
-> environment as an experimental research tool rather than a
-> general-purpose scenario runner.
 
 ## `RFRLGymIQEnv`
 
@@ -146,6 +115,38 @@ rather than mutated in place.
 | ----- | ----- |
 |
 
+## `RFRLGymAbstractEnv_LD`
+
+[![Class](https://img.shields.io/badge/Class-RFRLGymAbstractEnv__LD-green?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
+[![Paradigm](https://img.shields.io/badge/Paradigm-Monolithic-lightgrey?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
+[![Research](https://img.shields.io/badge/Research-Learning%20Dynamics-orange?style=for-the-badge)](https://github.com/SLeathersII/rfrl/blob/main/rfrl-gym-docs/docs/api_envs.md#rfrlgymabstractenv_ld)
+
+A stripped-down variant built for studying **learning dynamics** rather
+than realistic scenarios — its own docstring describes it as an "upper
+bound" baseline. Instead of loading a scenario file and simulating
+entities, it pre-generates a fixed pool of `num_states` unique
+channel-occupancy patterns (`gen_states`, combinatorially sampled with a
+seed) and cycles through them by rolling the state array each step —
+there's no entity behavior at all, just a perfectly-sensed, repeating
+grid-world label map.
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| `num_channels` | `int` | `10` | Channel count. |
+| `num_emitters` | `int` | `7` | How many channels are "occupied" in each generated state. |
+| `num_states` | `int` | `10` | Size of the pre-generated state pool (bounded by `C(num_channels, num_emitters)`). |
+| `max_steps` | `int` | `500` | Episode length. |
+| `render_mode` | `str` | `'null'` | Same options as other environments. |
+| `reward_mode` | `str` | `'dsa'` | `'dsa'` or `'jam'`. |
+| `seed` | `int` | `3` | Seed for state-pool generation. |
+
+> **Caveat:** this class's own comments flag unresolved rough edges — the
+> `target_entity` is hardcoded to `"fixed_hop_freq"` with a `# TODO try
+> and remove/avoid needing at this level` note, and `'jam'` reward mode
+> references `self.target_idx`, which is never actually assigned in this
+> class (only `'dsa'` mode is confirmed functional here). Treat this
+> environment as an experimental research tool rather than a
+> general-purpose scenario runner.
 ::: rfrl_gym.envs
     options:
         members: true
