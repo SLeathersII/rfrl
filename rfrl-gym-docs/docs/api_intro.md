@@ -30,6 +30,7 @@ modular components:
 
    - `reset()` → returns the initial `(observation, info)`.
    - `step(action)` → returns `(observation, reward, terminated, truncated, info)`
+
 In practice this means you can drop the composed environment
    straight into:
 
