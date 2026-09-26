@@ -75,29 +75,96 @@ construction fails immediately with `NotImplementedError` naming every
 valid type.
 
 ```json
-"entities": {
-  "incumbent_1": {
-    "type": "StochasticConstantFreq",
-    "channels": [3],
-    "onoff": [1, 1, 0],
-    "percent_on": 0.6,
-    "modem_params": {
-      "type": "qam", "order": 16, "filter": "RRC",
-      "center_frequency": [-0.1, 0.1], "bandwidth": 0.25,
-      "start": 0.25, "duration": 0.25
+{
+    "environment": 
+    {
+	    "num_channels": 10,
+	    "max_steps": 100,
+	    "observation_mode": "detect",
+	    "reward_mode": "jam",
+        "target_entity": "fixed_hop_freq_1",
+        "detector": 
+        {
+            "energy_detector":
+            {
+                "type": "EnergyDetector"
+            }
+        }    
+    },
+    "entities": 
+    {
+        "constant_freq_1": 
+        {
+            "type": "ConstantFreq",
+            "channels": [0],
+            "onoff": [1,1,0],
+            "modem_params":
+            {
+                "type": "qam",
+                "order": 16,
+                "filter": "RRC",
+                "center_frequency": [-0.1,0.1],
+                "bandwidth": 0.25,
+                "start": 0.25,
+                "duration": 0.25
+            }
+        },
+        "constant_freq_2":
+        {
+            "type": "ConstantFreq",
+            "channels": [9],
+            "onoff": [1,1,0],
+            "modem_params":
+            {
+                "type": "psk",
+                "order": 4,
+                "filter": "RRC",
+                "center_frequency": [-0.1,0.1],
+                "bandwidth": 0.5,
+                "start": 0.5,
+                "duration": 0.25
+            }
+        },
+        "fixed_hop_freq_1":
+        {
+            "type": "FixedHopFreq",
+            "channels": [1,2,3,4,5,6,7,8],
+            "onoff": [1,1,0],
+            "rand_hop": 0,
+            "modem_params":
+            {
+                "type": "n_fmcw",
+                "center_frequency": [0.0,0.0],
+                "bandwidth": 1.0,
+                "start": 0.0,
+                "duration": 1.0
+            }
+        },
+        "fixed_hop_freq_2":
+        {
+            "type": "FixedHopFreq",
+            "channels": [3,6,8,1,4,2,5,7],
+            "onoff": [1,1,0],
+            "rand_hop": 0,
+            "modem_params":
+            {
+                "type": "ask",
+                "order": 4,
+                "filter": "RRC",
+                "center_frequency": [0.0,0.0],
+                "bandwidth": 0.5,
+                "start": 0.0,
+                "duration": 1.0
+            }
+        }          
+    },
+    "render":
+    {
+        "render_mode": "pyqt",
+        "render_fps": 20,
+        "render_history": 20,
+        "render_background": "black"
     }
-  },
-  "adversary_1": {
-    "type": "SimpleJammer",
-    "channels": [0, 1, 2, 3, 4, 5, 6, 7],
-    "onoff": [1, 1, 0],
-    "avoid_repeats": true,
-    "modem_params": {
-      "type": "noise", "order": 2, "filter": "RRC",
-      "center_frequency": [-0.5, 0.5], "bandwidth": 1.0,
-      "start": 0.0, "duration": 1.0
-    }
-  }
 }
 ```
 
